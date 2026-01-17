@@ -1,0 +1,16 @@
+package com.hls.service;
+
+import com.hls.po.Singer;
+import com.baomidou.mybatisplus.extension.service.IService;
+
+/**
+ * <p>
+ * 歌手信息表 服务类
+ * </p>
+ *
+ * @author hls
+ * @since 2026-01-17
+ */
+public interface ISingerService extends IService<Singer> {
+
+}
