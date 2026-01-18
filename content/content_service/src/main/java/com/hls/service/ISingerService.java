@@ -1,6 +1,7 @@
 package com.hls.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hls.R;
 import com.hls.po.Singer;
 
 /**
@@ -13,4 +14,5 @@ import com.hls.po.Singer;
  */
 public interface ISingerService extends IService<Singer> {
 
+    R create(Long userId, Singer singer);
 }

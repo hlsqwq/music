@@ -1,9 +1,6 @@
-server:
-  port: 10010
-
 spring:
   application:
-    name: content-api
+    name: content
   profiles:
     active: dev
   cloud:
@@ -19,44 +16,11 @@ spring:
         file-extension: yaml
         refresh-enabled: true
         shared-configs:
-          - data-id: mysql.yaml
+          - data-id: jdbc.yaml
             group: music
             refresh: true
-  datasource: # MySQL连接信息（适配你的192.168.124.8、root、1234）
-    url: jdbc:mysql://192.168.124.8:3306/music_db?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8&allowMultiQueries=true&useSSL=false
-    username: root
-    password: 1234
-    # MySQL 8.x驱动类（必须用cj包，适配新版本）
-    driver-class-name: com.mysql.cj.jdbc.Driver
+          - data-id: path.yaml
+            group: music
+            refresh: true
 
 
-
-# MySQL + MyBatis-Plus 核心配置
-
-# MyBatis-Plus 配置
-mybatis-plus:
-  # Mapper接口XML文件路径（若有XML映射文件需配置）
-  mapper-locations: classpath:mapper/**/*.xml
-  # 实体类包路径（自动扫描实体类）
-  type-aliases-package: com.hls.model
-  # 全局配置
-  global-config:
-    db-config:
-      # 主键生成策略（雪花算法，适配分布式）
-      id-type: ASSIGN_ID
-      # 表名前缀（若你的表有统一前缀可配置，比如t_，无则注释）
-      # table-prefix: t_
-      # 逻辑删除字段配置（可选，有逻辑删除需求则开启）
-      logic-delete-field: is_deleted
-      logic-delete-value: 1
-      logic-not-delete-value: 0
-  # 配置项（开启驼峰命名转换）
-  configuration:
-    # 开启MyBatis日志（开发环境用，生产可关闭）
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-    # 开启驼峰命名自动转换（如user_name → userName）
-    map-underscore-to-camel-case: true
-    # 关闭二级缓存（默认关闭，按需开启）
-    cache-enabled: false
-    # 查询时列名为空不报错
-    call-setters-on-nulls: true

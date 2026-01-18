@@ -1,0 +1,58 @@
+spring:
+  application:
+    name: canal
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.124.8:8848  # 服务注册的Nacos地址（必填）
+        namespace: public
+        group: music
+      config:
+        server-addr: 192.168.124.8:8848  # 配置中心的Nacos地址（必填）
+        namespace: public
+        group: music
+        file-extension: yaml
+        refresh-enabled: true
+        shared-configs:
+          - data-id: redis.yaml
+            group: music
+            refresh: true
+
+
+
+
+
+
+#  data:
+#    redis:
+#      host: 192.168.124.8
+#      port: 6379
+#      password:
+#      database: 0
+#      timeout: 10000ms
+#      lettuce:
+#        pool:
+#          # 最大活跃连接数
+#          max-active: 8
+#          # 最小空闲连接数
+#          max-idle: 8
+#          # 最大等待时间（-1表示无限制）
+#          max-wait: -1ms
+#
+## Canal客户端配置
+#canal:
+#  # Canal服务端地址（单机：ip:port；集群：多个地址用,分隔）
+#  server: 192.168.124.8:11111
+#  # Canal实例名（默认是example，和Canal服务端的instance名一致）
+#  destination: example
+#  # 用户名/密码（Canal服务端默认无，若配置了则填写）
+#  username: canal
+#  password: canal
+#  # 批量获取消息的数量（默认1000，可根据业务调整）
+#  batch-size: 1000
+#  # 超时时间（毫秒）
+#  timeout: 30000
+#server:
+#  port: 10100
