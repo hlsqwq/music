@@ -22,5 +22,11 @@ spring:
           - data-id: path.yaml
             group: music
             refresh: true
+          - data-id: redis.yaml
+            group: music
+            refresh: true
+          - data-id: multipart.yaml
+            group: music
+            refresh: true
 
 
