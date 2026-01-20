@@ -4,14 +4,14 @@ package com.hls.content.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hls.base.utils.WorksCateTopN;
 import com.hls.content.dto.EditSingerDto;
 import com.hls.content.dto.SingerDto;
 import com.hls.content.mapper.SingerMapper;
-import com.hls.content.service.ISingerService;
 import com.hls.content.po.Singer;
+import com.hls.content.service.ISingerService;
+import com.hls.content.service.ISongService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +35,7 @@ public class SingerServiceImpl extends ServiceImpl<SingerMapper, Singer> impleme
 
 
     private final WorksCateTopN worksCateTopN;
+    private final ISongService songService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -71,4 +72,6 @@ public class SingerServiceImpl extends ServiceImpl<SingerMapper, Singer> impleme
                 .map(v -> BeanUtil.copyProperties(v, EditSingerDto.class))
                 .toList();
     }
+
+
 }

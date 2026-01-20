@@ -1,6 +1,9 @@
-package com.hls.canal.service;
+package com.hls.content.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hls.base.PageParam;
+import com.hls.base.PageResult;
+import com.hls.content.po.Album;
 import com.hls.content.po.Audit;
 
 /**
@@ -12,5 +15,6 @@ import com.hls.content.po.Audit;
  * @since 2026-01-17
  */
 public interface IAuditService extends IService<Audit> {
+
 
 }

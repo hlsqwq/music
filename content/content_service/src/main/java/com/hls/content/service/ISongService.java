@@ -1,7 +1,11 @@
-package com.hls.canal.service;
+package com.hls.content.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hls.base.PageParam;
+import com.hls.base.PageResult;
 import com.hls.content.po.Song;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +17,6 @@ import com.hls.content.po.Song;
  */
 public interface ISongService extends IService<Song> {
 
+
+    PageResult<Song> pageBySingerId(Long id, PageParam pageParam);
 }

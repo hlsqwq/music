@@ -1,9 +1,12 @@
 package com.hls.content.controller;
 
 
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.springframework.web.bind.annotation.RestController;
+import com.hls.base.PageParam;
+import com.hls.base.PageResult;
+import com.hls.content.po.Album;
+import com.hls.content.service.IAuditService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * <p>
@@ -13,8 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
  * @author hls
  * @since 2026-01-17
  */
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/audit")
 public class AuditController {
+
+
 
 }

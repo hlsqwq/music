@@ -37,21 +37,6 @@ public class SingerDto {
     private String avatar;
 
 
-//    /**
-//     * 发布歌曲数量
-//     */
-//    private Integer songNum;
-//
-//    /**
-//     * 发布专辑数量
-//     */
-//    private Integer albumNum;
-//
-//    /**
-//     * 发布MV数量
-//     */
-//    private Integer mvNum;
-
     /**
      * 歌手简介
      */

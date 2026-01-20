@@ -2,6 +2,7 @@ package com.hls.content.controller;
 
 
 import com.hls.content.dto.EditSingerDto;
+import com.hls.content.dto.SingerDetailDto;
 import com.hls.content.dto.SingerDto;
 import com.hls.content.po.Singer;
 import com.hls.content.service.ISingerService;
@@ -59,9 +60,10 @@ public class SingerController {
     }
 
     @DeleteMapping("/{id}")
-    public void delete_singer(@PathVariable Long id) {
+    public void delete_manage_singer(@PathVariable Long id) {
         singerService.removeById(id);
     }
+
 
 
     /**
@@ -73,6 +75,15 @@ public class SingerController {
     public List<EditSingerDto> getTop10(int id) {
         return singerService.getTop10(id);
     }
+
+
+
+    @GetMapping("/detail/{id}")
+    public Singer get_detail(@PathVariable Long id) {
+        return singerService.getById(id);
+    }
+
+
 
 
 

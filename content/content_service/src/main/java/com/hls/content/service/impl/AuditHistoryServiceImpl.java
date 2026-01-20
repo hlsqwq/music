@@ -3,8 +3,8 @@ package com.hls.content.service.impl;
 
 import com.hls.content.mapper.AuditHistoryMapper;
 import com.hls.content.po.AuditHistory;
-import com.hls.canal.service.IAuditHistoryService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hls.content.service.IAuditHistoryService;
 import org.springframework.stereotype.Service;
 
 /**

@@ -1,5 +1,6 @@
 package com.hls.content.po;
 
+import cn.hutool.core.date.DateTime;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -50,6 +51,17 @@ public class Song implements Serializable {
      * 歌曲名称
      */
     private String name;
+
+    /**
+     * 专辑名
+     */
+    private String album;
+
+    /**
+     * 持续时长
+     */
+    private DateTime duration;
+
 
     /**
      * 点赞数

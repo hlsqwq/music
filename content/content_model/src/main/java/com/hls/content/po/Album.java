@@ -41,6 +41,12 @@ public class Album implements Serializable {
      */
     private Integer userId;
 
+
+    /**
+     * 专辑名
+     */
+    private String name;
+
     /**
      * 专辑封面URL
      */

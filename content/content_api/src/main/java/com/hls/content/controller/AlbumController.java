@@ -1,9 +1,13 @@
 package com.hls.content.controller;
 
 
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.springframework.web.bind.annotation.RestController;
+import com.hls.base.PageParam;
+import com.hls.base.PageResult;
+import com.hls.canal.service.IAlbumService;
+import com.hls.content.po.Album;
+import com.hls.content.service.IAuditService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * <p>
@@ -13,8 +17,17 @@ import org.springframework.web.bind.annotation.RestController;
  * @author hls
  * @since 2026-01-17
  */
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/album")
 public class AlbumController {
 
+    private final IAlbumService albumService;
+
+
+
+    @GetMapping("/page/{id}")
+    public PageResult<Album> pageBySingerId(@PathVariable Long id, @RequestBody PageParam pageParam) {
+        return albumService.pageBySingerId(id,pageParam);
+    }
 }
