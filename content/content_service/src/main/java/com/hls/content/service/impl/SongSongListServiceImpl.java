@@ -1,10 +1,10 @@
-package com.hls.canal.service.impl;
+package com.hls.content.service.impl;
 
 
-import com.hls.canal.mapper.SongSongListMapper;
+import com.hls.content.mapper.SongSongListMapper;
 import com.hls.content.po.SongSongList;
-import com.hls.canal.service.ISongSongListService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hls.content.service.ISongSongListService;
 import org.springframework.stereotype.Service;
 
 /**
