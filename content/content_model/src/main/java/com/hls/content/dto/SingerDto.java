@@ -20,7 +20,6 @@ import java.time.LocalDateTime;
  * @since 2026-01-17
  */
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class SingerDto {

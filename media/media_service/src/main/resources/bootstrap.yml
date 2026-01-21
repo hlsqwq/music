@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: media
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.124.8:8848  # 服务注册的Nacos地址（必填）
+        namespace: public
+        group: music
+      config:
+        server-addr: 192.168.124.8:8848  # 配置中心的Nacos地址（必填）
+        namespace: public
+        group: music
+        file-extension: yaml
+        refresh-enabled: true
+        shared-configs:
+          - data-id: jdbc.yaml
+            group: music
+            refresh: true
+          - data-id: path.yaml
+            group: music
+            refresh: true
+          - data-id: redis.yaml
+            group: music
+            refresh: true
+          - data-id: multipart.yaml
+            group: music
+            refresh: true
+    config:
+      override-none: true
+PoPath: media
+
+
+minio:
+  endpoint: http://192.168.124.8:9000
+  accessKey: minio
+  secretKey: minio123
+  bucket:
+    temp: temp
+    music: music
+

@@ -1,10 +1,11 @@
-package com.hls.canal.service.impl;
+package com.hls.content.service.impl;
 
 
-import com.hls.canal.mapper.UserMapper;
-import com.hls.content.po.User;
-import com.hls.canal.service.IUserService;
+
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hls.content.mapper.UserMapper;
+import com.hls.content.po.User;
+import com.hls.content.service.IUserService;
 import org.springframework.stereotype.Service;
 
 /**

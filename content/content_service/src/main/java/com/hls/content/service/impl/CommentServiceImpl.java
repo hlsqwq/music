@@ -1,9 +1,10 @@
-package com.hls.canal.service.impl;
+package com.hls.content.service.impl;
 
 
-import com.hls.canal.mapper.CommentMapper;
-import com.hls.content.po.Comment;
+
 import com.hls.canal.service.ICommentService;
+import com.hls.content.mapper.CommentMapper;
+import com.hls.content.po.Comment;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 

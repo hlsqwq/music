@@ -1,10 +1,11 @@
-package com.hls.canal.service.impl;
+package com.hls.content.service.impl;
 
 
-import com.hls.canal.mapper.FollowMapper;
-import com.hls.content.po.Follow;
-import com.hls.canal.service.IFollowService;
+
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hls.canal.service.IFollowService;
+import com.hls.content.mapper.FollowMapper;
+import com.hls.content.po.Follow;
 import org.springframework.stereotype.Service;
 
 /**

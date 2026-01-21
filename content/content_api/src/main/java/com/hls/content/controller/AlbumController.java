@@ -3,9 +3,9 @@ package com.hls.content.controller;
 
 import com.hls.base.PageParam;
 import com.hls.base.PageResult;
-import com.hls.canal.service.IAlbumService;
+
 import com.hls.content.po.Album;
-import com.hls.content.service.IAuditService;
+import com.hls.content.service.IAlbumService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

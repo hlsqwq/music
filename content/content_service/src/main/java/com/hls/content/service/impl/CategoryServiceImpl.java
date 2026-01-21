@@ -1,10 +1,11 @@
 package com.hls.content.service.impl;
 
 
-import com.hls.canal.service.ICategoryService;
+
 import com.hls.content.mapper.CategoryMapper;
 import com.hls.content.po.Category;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hls.content.service.ICategoryService;
 import org.springframework.stereotype.Service;
 
 /**

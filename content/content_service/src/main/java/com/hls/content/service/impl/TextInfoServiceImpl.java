@@ -1,10 +1,10 @@
-package com.hls.canal.service.impl;
+package com.hls.content.service.impl;
 
 
-import com.hls.canal.mapper.TextInfoMapper;
-import com.hls.content.po.TextInfo;
-import com.hls.canal.service.ITextInfoService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hls.content.mapper.TextInfoMapper;
+import com.hls.content.po.TextInfo;
+import com.hls.content.service.ITextInfoService;
 import org.springframework.stereotype.Service;
 
 /**
