@@ -1,7 +1,6 @@
 package com.hls.media.service.impl;
 
 
-import com.baomidou.mybatisplus.core.batch.MybatisBatch;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hls.base.utils.MinioTempRedis;
 import com.hls.media.config.MinioConfig;
@@ -10,14 +9,12 @@ import com.hls.media.po.Media;
 import com.hls.media.po.MediaTemp;
 import com.hls.media.service.IMediaService;
 import com.hls.media.service.IMediaTempService;
-import io.minio.GetPresignedObjectUrlArgs;
-import io.minio.MinioClient;
-import io.minio.StatObjectArgs;
-import io.minio.StatObjectResponse;
+import io.minio.*;
 import io.minio.errors.*;
 import io.minio.http.Method;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +22,7 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -45,6 +43,9 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
     private final MinioConfig minioConfig;
     private final MinioClient minioClient;
     private final IMediaTempService mediaTempService;
+
+    @Autowired
+    private MediaServiceImpl mediaService;
 
 
     /**
@@ -99,6 +100,7 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
         try {
             return minioClient.statObject(build);
         } catch (Exception e) {
+            log.error("md5:{},fileName:{}，index：{}，分块合并失败{}",md5,fileName,id, e.getMessage());
             return null;
         }
     }
@@ -136,7 +138,6 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
 
 
 
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public String checkFile(Long userId, String fileMd5, String fileName) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         String filePath = getFilePath(fileMd5, fileName);
@@ -147,13 +148,8 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
         if(stat==null){
             return getSignature(null,fileMd5,fileName);
         }
-        MediaTemp mediaTemp = new MediaTemp();
-        mediaTemp.setPath(filePath);
-        mediaTemp.setUrl(minioConfig.temp+"/"+filePath);
-        mediaTemp.setSize(stat.size());
-        mediaTemp.setCreateTime(LocalDateTime.now());
-        mediaTemp.setUserId(userId);
-        mediaTempService.save(mediaTemp);
+
+        mediaService.saveTempDb(userId,getFilePath(fileMd5,filePath),stat);
 
         String etag = stat.etag();
         if(!etag.equals(fileMd5)){
@@ -163,17 +159,14 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
         return "ok";
     }
 
+    /**
+     * 保存分块数据到Db
+     * @param userId
+     * @param filePath
+     * @param stat
+     */
     @Transactional(rollbackFor = Exception.class)
-    @Override
-    public String checkChunk(Long userId, Long id, String chunkMd5, String fileMd5) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
-        String filePath = getChunkPath(id,chunkMd5);
-        if (minioTempRedis.checkFile(fileMd5)) {
-            return "ok";
-        }
-        StatObjectResponse stat = getStat(id,fileMd5, null);
-        if(stat==null){
-            return getSignature(id,fileMd5,null);
-        }
+    public void saveTempDb(Long userId,String filePath,StatObjectResponse stat){
         MediaTemp mediaTemp = new MediaTemp();
         mediaTemp.setPath(filePath);
         mediaTemp.setUrl(minioConfig.temp+"/"+filePath);
@@ -181,20 +174,84 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
         mediaTemp.setCreateTime(LocalDateTime.now());
         mediaTemp.setUserId(userId);
         mediaTempService.save(mediaTemp);
-
-        String etag = stat.etag();
-        if(!etag.equals(fileMd5)){
-            return getSignature(id,fileMd5,null);
-        }
-        minioTempRedis.addFile(fileMd5);
-        return "ok";
     }
 
 
 
+    @Override
+    public String checkChunk(Long userId, Long id, String chunkMd5, String fileMd5) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+        String filePath = getChunkPath(id,fileMd5);
+        if (minioTempRedis.checkFile(chunkMd5)) {
+            return "ok";
+        }
+        StatObjectResponse stat = getStat(id,fileMd5, null);
+        if(stat==null){
+            return getSignature(id,fileMd5,null);
+        }
+        mediaService.saveTempDb(userId,getChunkPath(id,fileMd5),stat);
 
+        String etag = stat.etag();
+        if(!etag.equals(chunkMd5)){
+            return getSignature(id,fileMd5,null);
+        }
+        minioTempRedis.addFile(chunkMd5);
+        return "ok";
+    }
 
+    /**
+     * 检查分块的数量
+     * @param total 总数
+     * @param fileMd5
+     * @return
+     */
+    private boolean checkChunkNum(int total,String fileMd5){
+        for (int i = 0; i < total; i++) {
+            StatObjectResponse stat = getStat(Long.valueOf(i), fileMd5, null);
+            if(stat==null){
+                return false;
+            }
+        }
+        return true;
+    }
 
+    @Override
+    public String merge(Long userId, int total, String fileMd5, String fileName) {
+        if (!checkChunkNum(total,fileMd5)) {
+            log.error("分块数量缺失");
+            return "分块数量缺失";
+        }
+        ArrayList<ComposeSource> list = new ArrayList<>();
+        for (int i = 0; i < total; i++) {
+            ComposeSource build = ComposeSource.builder()
+                    .bucket(minioConfig.temp)
+                    .object(getChunkPath(Long.valueOf(i), fileMd5))
+                    .build();
+            list.add(build);
+        }
+        try {
+            minioClient.composeObject(ComposeObjectArgs.builder()
+                    .sources(list)
+                    .bucket(minioConfig.temp)
+                    .object(getFilePath(fileMd5, fileName))
+                    .build());
+        } catch (Exception e) {
+            //todo throw
+            e.printStackTrace();
+            log.error("md5:{},fileName:{}分块合并失败{}",fileMd5,fileName, e.getMessage());
+            return null;
+        }
+        StatObjectResponse stat = getStat(0L, fileMd5, fileName);
+        if(stat==null){
+            return null;
+        }
+        mediaService.saveTempDb(userId,getFilePath(fileMd5,getFilePath(fileMd5,fileName)),stat);
+
+        if(!stat.etag().equals(fileMd5)){
+            log.error("md5:{},fileName:{}合并文件md5错误",fileMd5,fileName);
+            return "合并文件md5错误";
+        }
+        return "ok";
+    }
 
 
 }

@@ -57,8 +57,11 @@ public class MediaController {
 
 
 
-//    @GetMapping("/merge")
-//    public
+    @GetMapping("/merge")
+    public String merge(int total,String fileMd5,String fileName){
+        Long userId=1L;
+        return mediaService.merge(userId,total,fileMd5,fileName);
+    }
 
 
 }
