@@ -1,4 +1,4 @@
-package com.hls.canal.service;
+package com.hls.content.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hls.content.po.Comment;

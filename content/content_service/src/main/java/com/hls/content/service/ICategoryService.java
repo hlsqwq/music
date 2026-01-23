@@ -1,7 +1,10 @@
 package com.hls.content.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hls.content.dto.CategoryTreeDto;
 import com.hls.content.po.Category;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +16,5 @@ import com.hls.content.po.Category;
  */
 public interface ICategoryService extends IService<Category> {
 
+    List<CategoryTreeDto> getAllCategory();
 }

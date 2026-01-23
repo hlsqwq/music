@@ -30,15 +30,19 @@ public class Category implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
+
+
+    /**
+     *  路径
+     */
+    private String path;
+
+
+
     /**
      * 分类名称（如流行、摇滚、民谣）
      */
     private String content;
-
-    /**
-     * 父类id(0为一级分类)
-     */
-    private Integer parentId;
 
 
 }

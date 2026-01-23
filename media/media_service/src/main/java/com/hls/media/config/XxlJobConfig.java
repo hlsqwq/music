@@ -41,6 +41,12 @@ public class XxlJobConfig {
     private int logRetentionDays;
 
 
+    /**
+     * 清理时间间隔默认10分钟
+     */
+    @Value("${clearTime}")
+    public int clearTime;
+
     @Bean
     public XxlJobSpringExecutor xxlJobExecutor() {
         logger.info(">>>>>>>>>>> xxl-job config init.");
