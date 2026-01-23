@@ -3,6 +3,8 @@ package com.hls.media.service;
 import com.hls.media.po.MediaTemp;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.List;
+
 /**
  * <p>
  *  服务类
@@ -13,4 +15,10 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IMediaTempService extends IService<MediaTemp> {
 
+
+    List<MediaTemp> getTask();
+
+    void addTryNum(Long id);
+
+    void delTask(Long id);
 }

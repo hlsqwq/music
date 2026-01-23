@@ -9,12 +9,14 @@ import com.hls.media.po.Media;
 import com.hls.media.po.MediaTemp;
 import com.hls.media.service.IMediaService;
 import com.hls.media.service.IMediaTempService;
+import groovy.lang.Lazy;
 import io.minio.*;
 import io.minio.errors.*;
 import io.minio.http.Method;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,8 +46,8 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
     private final MinioClient minioClient;
     private final IMediaTempService mediaTempService;
 
-    @Autowired
-    private MediaServiceImpl mediaService;
+
+    private final ApplicationContext applicationContext;
 
 
     /**
@@ -149,7 +151,8 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
             return getSignature(null,fileMd5,fileName);
         }
 
-        mediaService.saveTempDb(userId,getFilePath(fileMd5,filePath),stat);
+        MediaServiceImpl bean = applicationContext.getBean(MediaServiceImpl.class);
+        bean.saveTempDb(userId,getFilePath(fileMd5,filePath),stat);
 
         String etag = stat.etag();
         if(!etag.equals(fileMd5)){
@@ -188,7 +191,8 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
         if(stat==null){
             return getSignature(id,fileMd5,null);
         }
-        mediaService.saveTempDb(userId,getChunkPath(id,fileMd5),stat);
+        MediaServiceImpl bean = applicationContext.getBean(MediaServiceImpl.class);
+        bean.saveTempDb(userId,getChunkPath(id,fileMd5),stat);
 
         String etag = stat.etag();
         if(!etag.equals(chunkMd5)){
@@ -244,7 +248,8 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
         if(stat==null){
             return null;
         }
-        mediaService.saveTempDb(userId,getFilePath(fileMd5,getFilePath(fileMd5,fileName)),stat);
+        MediaServiceImpl bean = applicationContext.getBean(MediaServiceImpl.class);
+        bean.saveTempDb(userId,getFilePath(fileMd5,getFilePath(fileMd5,fileName)),stat);
 
         if(!stat.etag().equals(fileMd5)){
             log.error("md5:{},fileName:{}合并文件md5错误",fileMd5,fileName);

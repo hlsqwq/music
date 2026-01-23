@@ -29,4 +29,5 @@ public class MinioConfig {
                 .credentials(accessKey, secretKey)
                 .build();
     }
+
 }

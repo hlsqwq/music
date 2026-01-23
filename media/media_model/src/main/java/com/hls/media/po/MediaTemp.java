@@ -42,6 +42,13 @@ public class MediaTemp implements Serializable {
      */
     private Long size;
 
+
+    /**
+     * 重试次数
+     */
+    private int retry;
+
+
     private LocalDateTime createTime;
 
 
