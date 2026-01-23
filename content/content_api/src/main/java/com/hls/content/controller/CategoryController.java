@@ -4,9 +4,7 @@ package com.hls.content.controller;
 import com.hls.content.dto.CategoryTreeDto;
 import com.hls.content.service.ICategoryService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -31,4 +29,11 @@ public class CategoryController {
     public List<CategoryTreeDto> getAllCategory(){
         return categoryService.getAllCategory();
     }
+
+    @PostMapping("add")
+    public void addCategory(Long id,String content){
+        Long userId=1L;
+        categoryService.addCategory(userId,id,content);
+    }
+
 }

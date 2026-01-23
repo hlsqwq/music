@@ -17,4 +17,6 @@ import java.util.List;
 public interface ICategoryService extends IService<Category> {
 
     List<CategoryTreeDto> getAllCategory();
+
+    void addCategory(Long userId, Long id, String content);
 }
