@@ -71,5 +71,26 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         updateById(category);
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    @Redis(key = "Category_AllCategory",type = "post")
+    @Override
+    public void updateCategory(Long userId, Long id, String content) {
+        //todo
+        Category byId = getById(id);
+        if(Objects.isNull(byId)){
+            return;
+        }
+        byId.setContent(content);
+        updateById(byId);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Redis(key = "Category_AllCategory",type = "post")
+    @Override
+    public void deleteCategory(Long userId, Long id) {
+        //todo
+        removeById(id);
+    }
+
 
 }

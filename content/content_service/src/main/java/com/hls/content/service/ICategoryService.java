@@ -19,4 +19,8 @@ public interface ICategoryService extends IService<Category> {
     List<CategoryTreeDto> getAllCategory();
 
     void addCategory(Long userId, Long id, String content);
+
+    void updateCategory(Long userId, Long id, String content);
+
+    void deleteCategory(Long userId, Long id);
 }
