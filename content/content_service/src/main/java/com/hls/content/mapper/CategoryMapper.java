@@ -18,4 +18,6 @@ import java.util.List;
 public interface CategoryMapper extends BaseMapper<Category> {
 
     List<Category> getRootCate();
+
+
 }

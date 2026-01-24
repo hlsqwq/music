@@ -12,6 +12,7 @@ import com.hls.content.service.ICategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,10 +55,20 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         return list;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Redis(key = "Category_AllCategory",type = "post")
     @Override
     public void addCategory(Long userId, Long id, String content) {
         //todo
+        Category byId = getById(id);
+        if(Objects.isNull(byId)){
+            return;
+        }
+        Category category = new Category();
+        category.setContent(content);
+        save(category);
+        category.setPath(byId.getPath()+category.getId()+"/");
+        updateById(category);
     }
 
 

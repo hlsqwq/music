@@ -4,6 +4,7 @@ package com.hls.content.controller;
 import com.hls.content.dto.CategoryTreeDto;
 import com.hls.content.service.ICategoryService;
 import lombok.RequiredArgsConstructor;
+import org.apache.ibatis.annotations.Delete;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,5 +36,8 @@ public class CategoryController {
         Long userId=1L;
         categoryService.addCategory(userId,id,content);
     }
+
+
+
 
 }
