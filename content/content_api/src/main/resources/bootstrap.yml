@@ -29,4 +29,20 @@ spring:
             group: music
             refresh: true
 
-
+spring:
+  rabbitmq:
+    host: 192.168.124.8
+    port: 5672
+    virtual-host: /
+    username: admin
+    password: admin123
+    listener:
+      simple:
+        prefetch: 1
+#spring:
+#rabbitmq:
+#  host: 192.168.124.8
+#  port: 5672
+#  virtual-host: /
+#  username: admin
+#  password: admin123

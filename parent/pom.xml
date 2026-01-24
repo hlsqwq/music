@@ -46,9 +46,19 @@
     <dependencyManagement>
         <dependencies>
 
+            <!-- Source: https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>2.15.2</version>
+            </dependency>
 
-
-
+            <!-- Source: https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-amqp -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-amqp</artifactId>
+                <version>2.7.18</version>
+            </dependency>
 
 
             <!-- Source: https://mvnrepository.com/artifact/cn.hutool/hutool-core -->

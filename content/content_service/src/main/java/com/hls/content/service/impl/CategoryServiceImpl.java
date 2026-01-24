@@ -1,6 +1,5 @@
 package com.hls.content.service.impl;
 
-
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.hls.content.config.Redis;
@@ -56,28 +55,26 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     }
 
     @Transactional(rollbackFor = Exception.class)
-    @Redis(key = "Category_AllCategory",type = "post")
+    @Redis(key = "Category_AllCategory", type = "post")
     @Override
     public void addCategory(Long userId, Long id, String content) {
-        //todo
         Category byId = getById(id);
-        if(Objects.isNull(byId)){
+        if (Objects.isNull(byId)) {
             return;
         }
         Category category = new Category();
         category.setContent(content);
         save(category);
-        category.setPath(byId.getPath()+category.getId()+"/");
+        category.setPath(byId.getPath() + category.getId() + "/");
         updateById(category);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    @Redis(key = "Category_AllCategory",type = "post")
+    @Redis(key = "Category_AllCategory", type = "post")
     @Override
     public void updateCategory(Long userId, Long id, String content) {
-        //todo
         Category byId = getById(id);
-        if(Objects.isNull(byId)){
+        if (Objects.isNull(byId)) {
             return;
         }
         byId.setContent(content);
@@ -85,12 +82,14 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     }
 
     @Transactional(rollbackFor = Exception.class)
-    @Redis(key = "Category_AllCategory",type = "post")
+    @Redis(key = "Category_AllCategory", type = "post")
     @Override
     public void deleteCategory(Long userId, Long id) {
-        //todo
+        Category byId = getById(id);
+        if (Objects.isNull(byId)) {
+            return;
+        }
         removeById(id);
     }
-
 
 }

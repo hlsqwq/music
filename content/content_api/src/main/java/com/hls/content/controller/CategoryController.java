@@ -1,9 +1,9 @@
 package com.hls.content.controller;
 
+import com.hls.content.config.Access;
 import com.hls.content.dto.CategoryTreeDto;
 import com.hls.content.service.ICategoryService;
 import lombok.RequiredArgsConstructor;
-import org.apache.ibatis.annotations.Delete;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,31 +30,31 @@ public class CategoryController {
 
     /**
      *
-     * @param id    父类id
+     * @param id      父类id
      * @param content
      */
+    @Access(value = "member")
     @PostMapping("add")
     public void addCategory(Long id, String content) {
-        // todo: 权限判断
         Long userId = 1L;
         categoryService.addCategory(userId, id, content);
     }
 
     /**
      *
-     * @param id    分类id
+     * @param id      分类id
      * @param content
      */
+    @Access(value = "member")
     @PutMapping("update")
     public void updateCategory(Long id, String content) {
-        // todo: 权限判断
         Long userId = 1L;
         categoryService.updateCategory(userId, id, content);
     }
 
+    @Access(value = "member")
     @DeleteMapping("delete")
     public void deleteCategory(Long id) {
-        // todo: 权限判断
         Long userId = 1L;
         categoryService.deleteCategory(userId, id);
     }

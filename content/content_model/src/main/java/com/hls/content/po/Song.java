@@ -43,9 +43,9 @@ public class Song implements Serializable {
     private Integer userId;
 
     /**
-     * 关联媒体文件ID
+     * 音源
      */
-    private Integer mediaId;
+    private String music;
 
     /**
      * 歌曲名称
@@ -53,9 +53,9 @@ public class Song implements Serializable {
     private String name;
 
     /**
-     * 歌曲封面
+     * 歌曲封面媒体id
      */
-    private String avatar;
+    private Long avatar;
 
     /**
      * 专辑名
@@ -71,7 +71,19 @@ public class Song implements Serializable {
     /**
      * 点赞数
      */
-    private Integer likeNum;
+    private Long likeNum;
+
+
+    /**
+     * 播放数
+     */
+    private Long playNum;
+
+
+    /**
+     * 评论数
+     */
+    private Long commentNum;
 
     /**
      * 歌曲简介

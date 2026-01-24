@@ -34,7 +34,7 @@ public class Album implements Serializable {
     /**
      * 歌手ID
      */
-    private Integer singerId;
+    private Long singerId;
 
     /**
      * 上传用户ID
@@ -50,7 +50,7 @@ public class Album implements Serializable {
     /**
      * 专辑封面URL
      */
-    private String avatar;
+    private Long avatar;
 
     /**
      * 专辑简介

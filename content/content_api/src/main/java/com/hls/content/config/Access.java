@@ -7,5 +7,5 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Access {
-    String value() default "deputy";
+    String value() default "member";
 }

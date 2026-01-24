@@ -62,6 +62,10 @@ public class Mv implements Serializable {
      */
     private Long commentNum;
 
+    /**
+     * 点赞数
+     */
+    private Long likeNum;
 
     /**
      * mv审核状态
