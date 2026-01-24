@@ -30,4 +30,11 @@ public class AlbumController {
     public PageResult<Album> pageBySingerId(@PathVariable Long id, @RequestBody PageParam pageParam) {
         return albumService.pageBySingerId(id,pageParam);
     }
+
+
+
+
+
+
+
 }
