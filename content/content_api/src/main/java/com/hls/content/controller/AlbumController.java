@@ -42,12 +42,12 @@ public class AlbumController {
     /**
      * 添加专辑
      * 
-     * @param album 专辑信息
+     * @param albumDetailDto 专辑详细信息
      */
     @Access(value = "deputy")
     @PostMapping("/add")
-    public void addAlbum(@RequestBody Album album) {
-        albumService.addAlbum(album);
+    public void addAlbum(@RequestBody AlbumDetailDto albumDetailDto) {
+        albumService.addAlbum(albumDetailDto);
     }
 
     /**

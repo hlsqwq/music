@@ -24,7 +24,7 @@ public interface IAlbumService extends IService<Album> {
      *
      * @param album 专辑信息
      */
-    void addAlbum(Album album);
+    void addAlbum(AlbumDetailDto albumDetailDto);
 
     /**
      * 删除专辑

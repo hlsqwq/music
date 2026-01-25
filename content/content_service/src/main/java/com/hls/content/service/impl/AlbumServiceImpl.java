@@ -64,23 +64,23 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void addAlbum(Album album) {
+    public void addAlbum(AlbumDetailDto albumDetailDto) {
+        Album album = BeanUtil.copyProperties(albumDetailDto, Album.class);
         if(album.getIntroduction().length()>50){
             String str=album.getIntroduction();
             album.setIntroduction(str.substring(0,25));
             save(album);
-            TextInfo textInfo = new TextInfo();
-            textInfo.setAlbumId(album.getId());
-            textInfo.setUserId(album.getUserId());
-            textInfo.setContent(str);
-            textInfo.setCreateTime(LocalDateTime.now());
-            textInfoService.save(textInfo);
+            album.setIntroduction(str);
+            saveText(album);
         }else{
             save(album);
         }
         Singer byId = singerService.getById(album.getSingerId());
         byId.setAlbumNum(byId.getAlbumNum()+1);
         singerService.updateById(byId);
+
+        List<Song> songs = albumDetailDto.getSongs();
+        List<Song> list = songs.stream().peek(song -> song.setAlbum(album.getName())).toList();
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -133,8 +133,26 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
     }
 
     @Transactional(rollbackFor = Exception.class)
+    public void saveText(Album album) {
+        TextInfo textInfo = new TextInfo();
+        textInfo.setAlbumId(album.getId());
+        textInfo.setUserId(album.getUserId());
+        textInfo.setContent(album.getIntroduction());
+        textInfo.setCreateTime(LocalDateTime.now());
+        textInfoService.save(textInfo);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void updateAlbum(Album album) {
+        LambdaQueryWrapper<TextInfo> eq = new LambdaQueryWrapper<TextInfo>()
+                .eq(TextInfo::getAlbumId, album.getId());
+        textInfoService.remove(eq);
+        if(album.getIntroduction().length()>50){
+            saveText(album);
+            String str=album.getIntroduction();
+            album.setIntroduction(str.substring(0,25));
+        }
         updateById(album);
     }
 
