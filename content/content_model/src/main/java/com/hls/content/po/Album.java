@@ -50,7 +50,7 @@ public class Album implements Serializable {
     /**
      * 专辑封面URL
      */
-    private Long avatar;
+    private String avatar;
 
     /**
      * 专辑简介

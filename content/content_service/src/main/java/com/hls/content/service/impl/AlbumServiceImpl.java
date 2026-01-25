@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hls.base.MusicCd;
 import com.hls.base.PageParam;
 import com.hls.base.PageResult;
 import com.hls.base.Status;
@@ -19,6 +20,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -63,7 +65,22 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void addAlbum(Album album) {
-        save(album);
+        if(album.getIntroduction().length()>50){
+            String str=album.getIntroduction();
+            album.setIntroduction(str.substring(0,25));
+            save(album);
+            TextInfo textInfo = new TextInfo();
+            textInfo.setAlbumId(album.getId());
+            textInfo.setUserId(album.getUserId());
+            textInfo.setContent(str);
+            textInfo.setCreateTime(LocalDateTime.now());
+            textInfoService.save(textInfo);
+        }else{
+            save(album);
+        }
+        Singer byId = singerService.getById(album.getSingerId());
+        byId.setAlbumNum(byId.getAlbumNum()+1);
+        singerService.updateById(byId);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -109,7 +126,8 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
         map.put("url",byId.getAvatar());
 
         CorrelationData cd = new CorrelationData(UUID.randomUUID().toString());
-        rabbitTemplate.convertAndSend(mqConfig.EXCHANGE, mqConfig.MEDIA_KEY, map,cd);
+        MusicCd musicCd = new MusicCd(0, mqConfig.EXCHANGE, mqConfig.MEDIA_KEY, map);
+        rabbitTemplate.convertAndSend(mqConfig.EXCHANGE, mqConfig.MEDIA_KEY, map,musicCd);
 
         removeById(albumId);
     }
