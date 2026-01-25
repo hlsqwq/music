@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 
 
-@MapperScan("com.hls.content.mapper")
+@MapperScan({"com.hls.content.mapper"})
 @SpringBootApplication(scanBasePackages = {"com.hls.content","com.hls.base"})
 public class ContentApiApplication {
 

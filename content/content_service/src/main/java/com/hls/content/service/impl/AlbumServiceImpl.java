@@ -2,23 +2,27 @@ package com.hls.content.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hls.base.PageParam;
 import com.hls.base.PageResult;
 import com.hls.base.Status;
+import com.hls.base.config.messageConfig;
+import com.hls.base.config.mqConfig;
 import com.hls.content.dto.AlbumDetailDto;
 import com.hls.content.mapper.AlbumMapper;
 import com.hls.content.po.*;
 import com.hls.content.service.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * <p>
@@ -38,6 +42,7 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
     private final IMvService mvService;
     private final ISingerHotService singerHotService;
     private final ITextInfoService textInfoService;
+
 
     @Override
     public PageResult<Album> pageBySingerId(Long id, PageParam pageParam) {
@@ -99,7 +104,12 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
         LambdaQueryWrapper<TextInfo> eq1 = new LambdaQueryWrapper<TextInfo>()
                 .eq(TextInfo::getAlbumId, albumId);
         textInfoService.remove(eq1);
-        //todo
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("type", "delUrl");
+        map.put("url",byId.getAvatar());
+
+        CorrelationData cd = new CorrelationData(UUID.randomUUID().toString());
+        rabbitTemplate.convertAndSend(mqConfig.EXCHANGE, mqConfig.MEDIA_KEY, map,cd);
 
         removeById(albumId);
     }
