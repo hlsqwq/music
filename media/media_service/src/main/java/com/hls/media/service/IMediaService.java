@@ -22,11 +22,11 @@ public interface IMediaService extends IService<Media> {
 
 
 
-    String checkFile(Long userId, String fileMd5, String fileName) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException;
+    String checkFile(Integer userId, String fileMd5, String fileName) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException;
 
-    String checkChunk(Long userId, Long id, String chunkMd5, String fileMd5) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException;
+    String checkChunk(Integer userId, Long id, String chunkMd5, String fileMd5) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException;
 
-    String merge(Long userId, int total, String fileMd5, String fileName);
+    String merge(Integer userId, int total, String fileMd5, String fileName);
 
     void del(String url);
 

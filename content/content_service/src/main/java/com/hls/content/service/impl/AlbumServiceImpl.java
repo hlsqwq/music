@@ -10,6 +10,7 @@ import com.hls.base.PageResult;
 import com.hls.base.Status;
 import com.hls.base.config.messageConfig;
 import com.hls.base.config.mqConfig;
+import com.hls.base.utils.mqUtils;
 import com.hls.content.dto.AlbumDetailDto;
 import com.hls.content.mapper.AlbumMapper;
 import com.hls.content.po.*;
@@ -39,7 +40,8 @@ import java.util.UUID;
 @Service
 public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements IAlbumService {
 
-    private final RabbitTemplate rabbitTemplate;
+
+    private mqUtils mqUtils;
     private final ISongService songService;
     private final ISingerService singerService;
     private final IMvService mvService;
@@ -67,7 +69,7 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
     @Override
     public void addAlbum(AlbumDetailDto albumDetailDto) {
         applicationContext.getBean(AlbumServiceImpl.class).add(albumDetailDto);
-        addMedia(albumDetailDto.getAvatar());
+        mqUtils.addMedia(albumDetailDto.getAvatar());
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -111,7 +113,7 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
         Album byId = getById(albumId);
         AlbumServiceImpl bean = applicationContext.getBean(AlbumServiceImpl.class);
         bean.del(byId);
-        delMedia(byId.getAvatar());
+        mqUtils.delMedia(byId.getAvatar());
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -155,23 +157,7 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
         removeById(byId.getId());
     }
 
-    private void delMedia(String url) {
-        HashMap<String, Object> map = new HashMap<>();
-        map.put("type", "delUrl");
-        map.put("url", url);
-        MusicCd musicCd = new MusicCd(0, mqConfig.EXCHANGE, mqConfig.MEDIA_KEY, map);
-        musicCd.setId(UUID.randomUUID().toString());
-        rabbitTemplate.convertAndSend(mqConfig.EXCHANGE, mqConfig.MEDIA_KEY, map, musicCd);
-    }
 
-    private void addMedia(String url) {
-        HashMap<String, Object> map = new HashMap<>();
-        map.put("type", "addUrl");
-        map.put("url", url);
-        MusicCd musicCd = new MusicCd(0, mqConfig.EXCHANGE, mqConfig.MEDIA_KEY, map);
-        musicCd.setId(UUID.randomUUID().toString());
-        rabbitTemplate.convertAndSend(mqConfig.EXCHANGE, mqConfig.MEDIA_KEY, map, musicCd);
-    }
 
     @Transactional(rollbackFor = Exception.class)
     public void saveText(Album album) {
@@ -192,8 +178,8 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
         }
         AlbumServiceImpl bean = applicationContext.getBean(AlbumServiceImpl.class);
         if(!byId.getAvatar().equals(albumDetailDto.getAvatar())){
-            delMedia(byId.getAvatar());
-            addMedia(albumDetailDto.getAvatar());
+            mqUtils.delMedia(byId.getAvatar());
+            mqUtils.addMedia(albumDetailDto.getAvatar());
         }
         bean.del(byId);
         bean.add(albumDetailDto);

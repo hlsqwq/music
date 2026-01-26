@@ -2,17 +2,15 @@ package com.hls.media.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.hls.media.config.XxlJobConfig;
-import com.hls.media.po.MediaTemp;
 import com.hls.media.mapper.MediaTempMapper;
+import com.hls.media.po.MediaTemp;
 import com.hls.media.service.IMediaTempService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 /**

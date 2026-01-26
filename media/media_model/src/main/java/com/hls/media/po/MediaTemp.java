@@ -11,11 +11,11 @@ import lombok.experimental.Accessors;
 
 /**
  * <p>
- * 
+ * 媒体临时存储
  * </p>
  *
  * @author hls
- * @since 2026-01-21
+ * @since 2026-01-26
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -28,7 +28,7 @@ public class MediaTemp implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
-    private Long userId;
+    private Integer userId;
 
     /**
      * minio,temp存储路径
@@ -38,16 +38,21 @@ public class MediaTemp implements Serializable {
     private String url;
 
     /**
+     * 文件名
+     */
+    private String fileName;
+
+    private String md5;
+
+    /**
      * 文件大小
      */
-    private Long size;
-
+    private Integer size;
 
     /**
      * 重试次数
      */
-    private int retry;
-
+    private Integer retry;
 
     private LocalDateTime createTime;
 

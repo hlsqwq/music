@@ -10,13 +10,11 @@ import com.hls.media.po.Media;
 import com.hls.media.po.MediaTemp;
 import com.hls.media.service.IMediaService;
 import com.hls.media.service.IMediaTempService;
-import groovy.lang.Lazy;
 import io.minio.*;
 import io.minio.errors.*;
 import io.minio.http.Method;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -142,7 +140,7 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
 
 
     @Override
-    public String checkFile(Long userId, String fileMd5, String fileName) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public String checkFile(Integer userId, String fileMd5, String fileName) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         String filePath = getFilePath(fileMd5, fileName);
         if (minioTempRedis.checkFile(fileMd5)) {
             return "ok";
@@ -170,11 +168,11 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
      * @param stat
      */
     @Transactional(rollbackFor = Exception.class)
-    public void saveTempDb(Long userId,String filePath,StatObjectResponse stat){
+    public void saveTempDb(Integer userId,String filePath,StatObjectResponse stat){
         MediaTemp mediaTemp = new MediaTemp();
         mediaTemp.setPath(filePath);
         mediaTemp.setUrl(minioConfig.temp+"/"+filePath);
-        mediaTemp.setSize(stat.size());
+        mediaTemp.setSize((int) stat.size());
         mediaTemp.setCreateTime(LocalDateTime.now());
         mediaTemp.setUserId(userId);
         mediaTempService.save(mediaTemp);
@@ -183,7 +181,7 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
 
 
     @Override
-    public String checkChunk(Long userId, Long id, String chunkMd5, String fileMd5) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public String checkChunk(Integer userId, Long id, String chunkMd5, String fileMd5) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         String filePath = getChunkPath(id,fileMd5);
         if (minioTempRedis.checkFile(chunkMd5)) {
             return "ok";
@@ -220,7 +218,7 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
     }
 
     @Override
-    public String merge(Long userId, int total, String fileMd5, String fileName) {
+    public String merge(Integer userId, int total, String fileMd5, String fileName) {
         if (!checkChunkNum(total,fileMd5)) {
             log.error("分块数量缺失");
             return "分块数量缺失";
@@ -268,8 +266,8 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
         if (one == null) {
             return;
         }
-        one.setRef_num(one.getRef_num()-1);
-        if (one.getRef_num()<=0) {
+        one.setRefNum(one.getRefNum()-1);
+        if (one.getRefNum()<=0) {
             remove(qw);
         }else{
             updateById(one);
@@ -285,7 +283,7 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
         if (one == null) {
             save(media);
         }else{
-            one.setRef_num(one.getRef_num()+1);
+            one.setRefNum(one.getRefNum()+1);
             updateById(one);
         }
     }

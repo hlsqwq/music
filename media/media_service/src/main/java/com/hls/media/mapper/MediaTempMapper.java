@@ -1,7 +1,7 @@
 package com.hls.media.mapper;
 
-import com.hls.media.po.MediaTemp;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.hls.media.po.MediaTemp;
 
 /**
  * <p>

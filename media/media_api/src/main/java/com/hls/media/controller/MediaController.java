@@ -37,7 +37,7 @@ public class MediaController {
     @GetMapping("/check/file")
     public String checkFile(String fileMd5,String fileName) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         //todo
-        Long userId=1L;
+        Integer userId=1;
         return mediaService.checkFile(userId,fileMd5,fileName);
     }
 
@@ -51,7 +51,7 @@ public class MediaController {
     @GetMapping("/check/chunk")
     public String checkChunk(Long id,String chunkMd5,String fileMd5) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         //todo
-        Long userId=1L;
+        Integer userId=1;
         return mediaService.checkChunk(userId,id,chunkMd5,fileMd5);
     }
 
@@ -59,7 +59,7 @@ public class MediaController {
 
     @GetMapping("/merge")
     public String merge(int total,String fileMd5,String fileName){
-        Long userId=1L;
+        Integer userId=1;
         return mediaService.merge(userId,total,fileMd5,fileName);
     }
 

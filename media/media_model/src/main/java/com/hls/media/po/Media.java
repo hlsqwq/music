@@ -15,7 +15,7 @@ import lombok.experimental.Accessors;
  * </p>
  *
  * @author hls
- * @since 2026-01-17
+ * @since 2026-01-26
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -25,9 +25,6 @@ public class Media implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    /**
-     * 媒体ID（主键）
-     */
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
@@ -41,36 +38,34 @@ public class Media implements Serializable {
      */
     private String bucket;
 
-
     /**
-     * 文件存储路径
+     * 文件路径
      */
     private String path;
-
-
 
     /**
      * 文件URL
      */
     private String url;
 
+    private String fileName;
 
+    private String md5;
 
     /**
      * 媒体审核状态
      */
     private String status;
 
-
     /**
      * 文件大小
      */
-    private int size;
+    private Integer size;
 
     /**
      * 引用次数
      */
-    private int ref_num;
+    private Integer refNum;
 
     /**
      * 创建时间
