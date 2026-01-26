@@ -47,6 +47,9 @@ public class mqHandle {
         }
         String type = message.get("type");
         String url = message.get("url");
+        if(url==null || url.isEmpty()){
+            return;
+        }
         String s1 = url.substring(url.indexOf("/"));
         switch (type) {
             case "delUrl"->{
