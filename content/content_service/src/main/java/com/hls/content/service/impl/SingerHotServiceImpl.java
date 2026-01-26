@@ -25,7 +25,7 @@ public class SingerHotServiceImpl extends ServiceImpl<SingerHotMapper, SingerHot
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void refreshHot(Long singerId, long likeNum, long playNum) {
+    public void refreshHot(Integer singerId, long likeNum, long playNum) {
         LambdaUpdateWrapper<SingerHot> eq = new LambdaUpdateWrapper<SingerHot>()
                 .eq(SingerHot::getId, singerId);
         eq.set(SingerHot::getLikeNum, likeNum);

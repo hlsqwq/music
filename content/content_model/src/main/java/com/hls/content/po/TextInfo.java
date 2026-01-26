@@ -29,27 +29,27 @@ public class TextInfo implements Serializable {
      * 文本ID（主键）
      */
     @TableId(value = "id", type = IdType.AUTO)
-    private Long id;
+    private Integer id;
 
     /**
      * 关联歌曲ID（歌词）
      */
-    private Long songId;
+    private Integer songId;
 
     /**
      * 关联歌手ID（歌手简介）
      */
-    private Long singerId;
+    private Integer singerId;
 
     /**
      * 关联专辑ID（专辑简介）
      */
-    private Long albumId;
+    private Integer albumId;
 
     /**
      * 创建用户ID
      */
-    private Long userId;
+    private Integer userId;
 
     /**
      * 文本内容（歌词/简介）

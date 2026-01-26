@@ -34,11 +34,9 @@ public class SingerController {
      * 管理端
      * @param singerDto
      */
-    @PostMapping("/create")
+    @PostMapping("/add")
     public void add_manage_singer(@RequestBody SingerDto singerDto) {
-        //todo
-        Long userId = 1L;
-        singerService.add_singer(userId, singerDto);
+        singerService.add_singer(singerDto);
     }
 
 
@@ -48,20 +46,25 @@ public class SingerController {
      */
     @PutMapping("/update")
     public void update_manage_singer(EditSingerDto editSingerDto) {
-        //todo
-        Long userId = 1L;
-        singerService.update_singer(userId, editSingerDto);
+        singerService.update_singer(editSingerDto);
     }
 
 
+    /**
+     * 获取歌手信息
+     * @param id
+     * @return
+     */
     @GetMapping("/{id}")
     public Singer get_manage_singer(@PathVariable Long id) {
         return singerService.getById(id);
     }
 
+
+
     @DeleteMapping("/{id}")
-    public void delete_manage_singer(@PathVariable Long id) {
-        singerService.removeById(id);
+    public void delete_manage_singer(@PathVariable Integer id) {
+        singerService.del_singer(id);
     }
 
 
@@ -75,14 +78,6 @@ public class SingerController {
     public List<EditSingerDto> getTop10(int id) {
         return singerService.getTop10(id);
     }
-
-
-
-    @GetMapping("/detail/{id}")
-    public Singer get_detail(@PathVariable Long id) {
-        return singerService.getById(id);
-    }
-
 
 
 

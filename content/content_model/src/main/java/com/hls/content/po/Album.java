@@ -29,17 +29,17 @@ public class Album implements Serializable {
      * 专辑ID（主键）
      */
     @TableId(value = "id", type = IdType.AUTO)
-    private Long id;
+    private Integer id;
 
     /**
      * 歌手ID
      */
-    private Long singerId;
+    private Integer singerId;
 
     /**
      * 上传用户ID
      */
-    private Long userId;
+    private Integer userId;
 
 
     /**

@@ -18,10 +18,11 @@ import java.util.List;
  */
 public interface ISingerService extends IService<Singer> {
 
-    void add_singer(Long userId, SingerDto singerDto);
+    void add_singer(SingerDto singerDto);
 
-    void update_singer(Long userId, EditSingerDto editSingerDto);
+    void update_singer(EditSingerDto editSingerDto);
 
     List<EditSingerDto> getTop10(int id);
 
+    void del_singer(Integer id);
 }

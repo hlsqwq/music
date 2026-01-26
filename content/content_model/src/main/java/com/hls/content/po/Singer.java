@@ -29,7 +29,7 @@ public class Singer implements Serializable {
      * 歌手ID（主键）
      */
     @TableId(value = "id", type = IdType.AUTO)
-    private Long id;
+    private Integer id;
 
     /**
      * 歌手姓名

@@ -15,5 +15,5 @@ import com.hls.content.po.SingerHot;
 public interface ISingerHotService extends IService<SingerHot> {
 
 
-    void refreshHot(Long singerId, long likeNum, long playNum);
+    void refreshHot(Integer singerId, long likeNum, long playNum);
 }
