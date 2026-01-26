@@ -41,20 +41,20 @@ public class Media implements Serializable {
      */
     private String bucket;
 
-    /**
-     * 头像文件URL
-     */
-    private String avatar;
 
     /**
-     * 音频文件URL
+     * 文件存储路径
      */
-    private String music;
+    private String path;
+
+
 
     /**
-     * MV文件URL
+     * 文件URL
      */
-    private String mv;
+    private String url;
+
+
 
     /**
      * 媒体审核状态
@@ -66,6 +66,11 @@ public class Media implements Serializable {
      * 文件大小
      */
     private int size;
+
+    /**
+     * 引用次数
+     */
+    private int ref_num;
 
     /**
      * 创建时间

@@ -34,27 +34,35 @@ spring:
           - data-id: minio.yaml
             group: music
             refresh: true
+          - data-id: mq.yaml
+            group: music
+            refresh: true
     config:
       override-none: true
-  rabbitmq:
-    host: 192.168.124.8
-    port: 5672
-    virtual-host: /
-    username: admin
-    password: admin123
-    listener:
-      simple:
-        prefetch: 1
-        retry:
-          enabled: true
-          initial-interval: 1000ms
-          max-attempts: 3
-          multiplier: 1
-          stateless: true
-    publisher-confirm-type: correlated
-    publisher-returns: true
+
 
 PoPath: media
+
+
+
+
+#  rabbitmq:
+#    host: 192.168.124.8
+#    port: 5672
+#    virtual-host: /
+#    username: admin
+#    password: admin123
+#    listener:
+#      simple:
+#        prefetch: 1
+#        retry:
+#          enabled: true
+#          initial-interval: 1000ms
+#          max-attempts: 3
+#          multiplier: 1
+#          stateless: true
+#    publisher-confirm-type: correlated
+#    publisher-returns: true
 
 
 #minio:

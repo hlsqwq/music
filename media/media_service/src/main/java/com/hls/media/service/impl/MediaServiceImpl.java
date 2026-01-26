@@ -1,6 +1,7 @@
 package com.hls.media.service.impl;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hls.base.utils.MinioTempRedis;
 import com.hls.media.config.MinioConfig;
@@ -256,6 +257,37 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
             return "合并文件md5错误";
         }
         return "ok";
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void del(String url) {
+        LambdaQueryWrapper<Media> qw = new LambdaQueryWrapper<Media>()
+                .eq(Media::getUrl, url);
+        Media one = getOne(qw);
+        if (one == null) {
+            return;
+        }
+        one.setRef_num(one.getRef_num()-1);
+        if (one.getRef_num()<=0) {
+            remove(qw);
+        }else{
+            updateById(one);
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void add(Media media) {
+        LambdaQueryWrapper<Media> qw = new LambdaQueryWrapper<Media>()
+                .eq(Media::getUrl, media.getUrl());
+        Media one = getOne(qw);
+        if (one == null) {
+            save(media);
+        }else{
+            one.setRef_num(one.getRef_num()+1);
+            updateById(one);
+        }
     }
 
 

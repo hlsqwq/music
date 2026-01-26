@@ -64,12 +64,12 @@ public class AlbumController {
     /**
      * 修改专辑
      * 
-     * @param album 专辑信息
+     * @param albumDetailDto 专辑信息
      */
     @Access(value = "deputy")
     @PutMapping("/update")
-    public void updateAlbum(@RequestBody Album album) {
-        albumService.updateAlbum(album);
+    public void updateAlbum(@RequestBody AlbumDetailDto albumDetailDto) {
+        albumService.updateAlbum(albumDetailDto);
     }
 
     /**
@@ -83,16 +83,5 @@ public class AlbumController {
         return albumService.getAlbumDetail(albumId);
     }
 
-    /**
-     * 修改专辑里的歌曲
-     * 
-     * @param albumId 专辑id
-     * @param songIds 歌曲id列表
-     */
-    @Access(value = "deputy")
-    @PutMapping("/update-songs/{albumId}")
-    public void updateAlbumSongs(@PathVariable Long albumId, @RequestBody List<Long> songIds) {
-        albumService.updateAlbumSongs(albumId, songIds);
-    }
 
 }

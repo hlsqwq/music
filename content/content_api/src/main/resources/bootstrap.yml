@@ -28,19 +28,13 @@ spring:
           - data-id: multipart.yaml
             group: music
             refresh: true
-  rabbitmq:
-    host: 192.168.124.8
-    port: 5672
-    virtual-host: /
-    username: admin
-    password: admin123
-    listener:
-      simple:
-        prefetch: 1
-    publisher-confirm-type: correlated
-    publisher-returns: true
+          - data-id: mq.yaml
+            group: music
+            refresh: true
 
 
+    config:
+      override-none: true
 
 
 #spring:

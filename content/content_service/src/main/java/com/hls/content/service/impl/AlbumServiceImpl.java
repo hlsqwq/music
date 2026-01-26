@@ -17,6 +17,7 @@ import com.hls.content.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,6 +45,7 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
     private final IMvService mvService;
     private final ISingerHotService singerHotService;
     private final ITextInfoService textInfoService;
+    private final ApplicationContext applicationContext;
 
 
     @Override
@@ -62,48 +64,75 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
         return albumPageResult;
     }
 
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void addAlbum(AlbumDetailDto albumDetailDto) {
-        Album album = BeanUtil.copyProperties(albumDetailDto, Album.class);
-        if(album.getIntroduction().length()>50){
-            String str=album.getIntroduction();
-            album.setIntroduction(str.substring(0,25));
-            save(album);
-            album.setIntroduction(str);
-            saveText(album);
-        }else{
-            save(album);
-        }
-        Singer byId = singerService.getById(album.getSingerId());
-        byId.setAlbumNum(byId.getAlbumNum()+1);
-        singerService.updateById(byId);
-
-        List<Song> songs = albumDetailDto.getSongs();
-        List<Song> list = songs.stream().peek(song -> song.setAlbum(album.getName())).toList();
+        applicationContext.getBean(AlbumServiceImpl.class).add(albumDetailDto);
+        addMedia(albumDetailDto.getAvatar());
     }
 
     @Transactional(rollbackFor = Exception.class)
+    protected void add(AlbumDetailDto albumDetailDto) {
+        Album album = BeanUtil.copyProperties(albumDetailDto, Album.class);
+        if (album.getIntroduction().length() > 50) {
+            String str = album.getIntroduction();
+            album.setIntroduction(str.substring(0, 25));
+            save(album);
+            album.setIntroduction(str);
+            saveText(album);
+        } else {
+            save(album);
+        }
+        Singer byId = singerService.getById(album.getSingerId());
+        byId.setAlbumNum(byId.getAlbumNum() + 1);
+        singerService.updateById(byId);
+
+        List<Song> songs = albumDetailDto.getSongs();
+        List<Song> list = songs.stream()
+                .filter(v -> v.getAlbum().isEmpty())
+                .filter(v->v.getStatus().equals(Status.pass))
+                .peek(song -> song.setAlbum(album.getName()))
+                .toList();
+        songService.updateBatchById(list);
+        long like = 0;
+        long play = 0;
+        for (Song song : list) {
+            like += song.getLikeNum();
+            play += song.getPlayNum();
+        }
+        SingerHot byId1 = singerHotService.getById(album.getSingerId());
+        singerHotService.refreshHot(albumDetailDto.getSingerId(),
+                byId1.getLikeNum() + like,
+                byId1.getPlayNum() + play);
+    }
+
+
     @Override
     public void deleteAlbum(Long albumId) {
         Album byId = getById(albumId);
-        if(byId == null){
+        AlbumServiceImpl bean = applicationContext.getBean(AlbumServiceImpl.class);
+        bean.del(byId);
+        delMedia(byId.getAvatar());
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    protected void del(Album byId){
+        if (byId == null) {
             return;
         }
         LambdaQueryWrapper<Song> eq = new LambdaQueryWrapper<Song>()
                 .eq(Song::getAlbum, byId.getName())
                 .eq(Song::getStatus, Status.pass);
         List<Song> list = songService.list(eq);
-        if(list!=null&& !list.isEmpty()){
-            Long playNum= 0L;
-            Long likeNum= 0L;
-            Long mvNum= 0L;
+        if (list != null && !list.isEmpty()) {
+            Long playNum = 0L;
+            Long likeNum = 0L;
+            Long mvNum = 0L;
             for (Song song : list) {
                 song.setAlbum(null);
                 playNum = song.getPlayNum();
                 likeNum = song.getLikeNum();
                 Mv byId1 = mvService.getById(song.getId());
-                if(byId1!=null){
+                if (byId1 != null) {
                     mvNum++;
                     playNum += byId1.getPlayNum();
                     likeNum += byId1.getLikeNum();
@@ -111,25 +140,37 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
             }
             songService.updateBatchById(list);
             Singer byId1 = singerService.getById(byId.getSingerId());
-            byId1.setAlbumNum(byId1.getAlbumNum()-1);
-            byId1.setMvNum(byId1.getMvNum()-mvNum);
-            byId1.setSongNum((byId1.getSongNum()-list.size()));
+            byId1.setAlbumNum(byId1.getAlbumNum() - 1);
+            byId1.setMvNum(byId1.getMvNum() - mvNum);
+            byId1.setSongNum((byId1.getSongNum() - list.size()));
             singerService.updateById(byId1);
             SingerHot byId2 = singerHotService.getById(byId.getSingerId());
-            singerHotService.refreshHot(byId.getSingerId(),byId2.getLikeNum()-likeNum,byId2.getPlayNum()-playNum);
+            singerHotService.refreshHot(byId.getSingerId(),
+                    byId2.getLikeNum() - likeNum,
+                    byId2.getPlayNum() - playNum);
         }
         LambdaQueryWrapper<TextInfo> eq1 = new LambdaQueryWrapper<TextInfo>()
-                .eq(TextInfo::getAlbumId, albumId);
+                .eq(TextInfo::getAlbumId, byId.getId());
         textInfoService.remove(eq1);
+        removeById(byId.getId());
+    }
+
+    private void delMedia(String url) {
         HashMap<String, Object> map = new HashMap<>();
         map.put("type", "delUrl");
-        map.put("url",byId.getAvatar());
-
-        CorrelationData cd = new CorrelationData(UUID.randomUUID().toString());
+        map.put("url", url);
         MusicCd musicCd = new MusicCd(0, mqConfig.EXCHANGE, mqConfig.MEDIA_KEY, map);
-        rabbitTemplate.convertAndSend(mqConfig.EXCHANGE, mqConfig.MEDIA_KEY, map,musicCd);
+        musicCd.setId(UUID.randomUUID().toString());
+        rabbitTemplate.convertAndSend(mqConfig.EXCHANGE, mqConfig.MEDIA_KEY, map, musicCd);
+    }
 
-        removeById(albumId);
+    private void addMedia(String url) {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("type", "addUrl");
+        map.put("url", url);
+        MusicCd musicCd = new MusicCd(0, mqConfig.EXCHANGE, mqConfig.MEDIA_KEY, map);
+        musicCd.setId(UUID.randomUUID().toString());
+        rabbitTemplate.convertAndSend(mqConfig.EXCHANGE, mqConfig.MEDIA_KEY, map, musicCd);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -142,18 +183,20 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
         textInfoService.save(textInfo);
     }
 
-    @Transactional(rollbackFor = Exception.class)
+
     @Override
-    public void updateAlbum(Album album) {
-        LambdaQueryWrapper<TextInfo> eq = new LambdaQueryWrapper<TextInfo>()
-                .eq(TextInfo::getAlbumId, album.getId());
-        textInfoService.remove(eq);
-        if(album.getIntroduction().length()>50){
-            saveText(album);
-            String str=album.getIntroduction();
-            album.setIntroduction(str.substring(0,25));
+    public void updateAlbum(AlbumDetailDto albumDetailDto) {
+        Album byId = getById(albumDetailDto.getId());
+        if(byId == null){
+            return;
         }
-        updateById(album);
+        AlbumServiceImpl bean = applicationContext.getBean(AlbumServiceImpl.class);
+        if(!byId.getAvatar().equals(albumDetailDto.getAvatar())){
+            delMedia(byId.getAvatar());
+            addMedia(albumDetailDto.getAvatar());
+        }
+        bean.del(byId);
+        bean.add(albumDetailDto);
     }
 
     @Override
@@ -171,18 +214,4 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
         return albumDetailDto;
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public void updateAlbumSongs(Long albumId, List<Long> songIds) {
-        Album byId = getById(albumId);
-        if (byId == null) {
-            return;
-        }
-        List<Song> songs = songService.listByIds(songIds);
-        List<Song> list = songs.stream()
-                .filter(v -> Objects.equals(v.getStatus(), Status.pass))
-                .peek(v -> v.setAlbum(byId.getName()))
-                .toList();
-        songService.updateBatchById(list);
-    }
 }

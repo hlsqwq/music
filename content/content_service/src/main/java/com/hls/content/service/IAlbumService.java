@@ -22,7 +22,7 @@ public interface IAlbumService extends IService<Album> {
     /**
      * 添加专辑
      *
-     * @param album 专辑信息
+     * @param albumDetailDto 专辑信息
      */
     void addAlbum(AlbumDetailDto albumDetailDto);
 
@@ -36,9 +36,9 @@ public interface IAlbumService extends IService<Album> {
     /**
      * 修改专辑
      *
-     * @param album 专辑信息
+     * @param albumDetailDto 专辑信息
      */
-    void updateAlbum(Album album);
+    void updateAlbum(AlbumDetailDto albumDetailDto);
 
     /**
      * 获取专辑详细信息
@@ -48,11 +48,5 @@ public interface IAlbumService extends IService<Album> {
      */
     AlbumDetailDto getAlbumDetail(Long albumId);
 
-    /**
-     * 修改专辑里的歌曲
-     *
-     * @param albumId  用户id
-     * @param songIds 歌曲id列表
-     */
-    void updateAlbumSongs(Long albumId, List<Long> songIds);
+
 }
