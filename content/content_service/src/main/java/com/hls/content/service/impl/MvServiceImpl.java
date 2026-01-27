@@ -17,9 +17,11 @@ import com.hls.content.mapper.SingerMapper;
 import com.hls.content.mapper.TextInfoMapper;
 import com.hls.content.service.IMvService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hls.content.service.ISingerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 /**
@@ -35,9 +37,9 @@ import java.util.List;
 public class MvServiceImpl extends ServiceImpl<MvMapper, Mv> implements IMvService {
 
     private final SingerMapper singerMapper;
-    private final TextInfoMapper textInfoMapper;
     private final mqUtils mqUtils;
-    private final SingerHotMapper singerHotMapper;
+    private final ISingerService singerService;
+
 
     @Override
     public PageResult<Mv> pageBySinger(Long id, PageParam pageParam) {
@@ -58,6 +60,7 @@ public class MvServiceImpl extends ServiceImpl<MvMapper, Mv> implements IMvServi
 
 
 
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void addMv(Mv mv) {
@@ -67,12 +70,8 @@ public class MvServiceImpl extends ServiceImpl<MvMapper, Mv> implements IMvServi
             singer.setMvNum(singer.getMvNum() + 1);
             singerMapper.updateById(singer);
         }
-        if (mv.getAvatar() != null) {
-            mqUtils.addMedia(mv.getAvatar());
-        }
-        if (mv.getVideo() != null) {
-            mqUtils.addMedia(mv.getVideo());
-        }
+        mqUtils.addMedia(mv.getAvatar());
+        mqUtils.addMedia(mv.getVideo());
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -91,13 +90,10 @@ public class MvServiceImpl extends ServiceImpl<MvMapper, Mv> implements IMvServi
             Singer singer = singerMapper.selectById(mv.getSingerId());
             if (singer != null && singer.getMvNum() > 0) {
                 singer.setMvNum(singer.getMvNum() - 1);
+                singer.setPlayNum(singer.getPlayNum()-mv.getPlayNum());
+                singer.setLikeNum(singer.getLikeNum() - mv.getLikeNum());
                 singerMapper.updateById(singer);
-            }
-
-            SingerHot singerHot = singerHotMapper.selectById(mv.getSingerId());
-            if (singerHot != null && mv.getPlayNum() != null) {
-                singerHot.setPlayNum(singerHot.getPlayNum() - mv.getPlayNum());
-                singerHotMapper.updateById(singerHot);
+                mqUtils.singerHot(singer.getId());
             }
         }
     }
@@ -123,14 +119,16 @@ public class MvServiceImpl extends ServiceImpl<MvMapper, Mv> implements IMvServi
             mqUtils.addMedia(mv.getVideo());
         }
 
-        if (mv.getPlayNum() != null && byId.getPlayNum() != null) {
-            SingerHot singerHot = singerHotMapper.selectById(mv.getSingerId());
-            if (singerHot != null) {
-                long playNumDiff = mv.getPlayNum() - byId.getPlayNum();
-                singerHot.setPlayNum(singerHot.getPlayNum() + playNumDiff);
-                singerHotMapper.updateById(singerHot);
-            }
+        Singer byId1 = singerService.getById(mv.getSingerId());
+        if(byId1 == null){
+            return;
         }
+        Long likeNum = mv.getLikeNum()-byId1.getLikeNum();
+        Long playNum = mv.getPlayNum()-byId1.getPlayNum();
+        byId1.setLikeNum(byId1.getLikeNum()+likeNum);
+        byId1.setPlayNum(byId1.getPlayNum()+playNum);
+        singerService.updateById(byId1);
+        mqUtils.singerHot(byId1.getId());
     }
 
     @Override

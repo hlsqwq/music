@@ -53,6 +53,19 @@ public class mqHandle {
         String s1 = url.substring(url.indexOf("/"));
         switch (type) {
             case "delUrl"->{
+                LambdaQueryWrapper<Media> q = new LambdaQueryWrapper<Media>()
+                        .eq(Media::getUrl, url);
+                Media one1 = mediaService.getOne(q);
+                if(one1==null){
+                    return;
+                }
+                one1.setRefNum(one1.getRefNum()-1);
+                if(one1.getRefNum()!=0){
+                    mediaService.updateById(one1);
+                    return;
+                }else{
+                    mediaService.removeById(one1.getId());
+                }
                 try {
                     minioClient.statObject(StatObjectArgs.builder()
                             .object(s1)

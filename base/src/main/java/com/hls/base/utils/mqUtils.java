@@ -35,4 +35,19 @@ public class mqUtils {
         musicCd.setId(UUID.randomUUID().toString());
         rabbitTemplate.convertAndSend(mqConfig.EXCHANGE, mqConfig.MEDIA_KEY, map, musicCd);
     }
+
+    public void singerHot(int singerId) {
+        MusicCd musicCd = new MusicCd(0, mqConfig.EXCHANGE, mqConfig.HOT_SINGER_KEY, singerId);
+        musicCd.setId(UUID.randomUUID().toString());
+        rabbitTemplate.convertAndSend(mqConfig.EXCHANGE, mqConfig.HOT_SINGER_KEY, singerId, musicCd);
+    }
+
+    public void songHot(int songId) {
+        MusicCd musicCd = new MusicCd(0, mqConfig.EXCHANGE, mqConfig.HOT_SONG_KEY, songId);
+        musicCd.setId(UUID.randomUUID().toString());
+        rabbitTemplate.convertAndSend(mqConfig.EXCHANGE, mqConfig.HOT_SONG_KEY, songId, musicCd);
+    }
+
+
+
 }

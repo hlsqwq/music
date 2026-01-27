@@ -15,7 +15,7 @@ import lombok.experimental.Accessors;
  * </p>
  *
  * @author hls
- * @since 2026-01-17
+ * @since 2026-01-27
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -37,24 +37,34 @@ public class Singer implements Serializable {
     private String name;
 
     /**
-     * 歌手头像媒体ID
+     * 封面
      */
     private String avatar;
 
     /**
      * 发布歌曲数量
      */
-    private Long songNum;
+    private Integer songNum;
 
     /**
      * 发布专辑数量
      */
-    private Long albumNum;
+    private Integer albumNum;
 
     /**
      * 发布MV数量
      */
-    private Long mvNum;
+    private Integer mvNum;
+
+    /**
+     * 播放量
+     */
+    private Long playNum;
+
+    /**
+     * 点赞数
+     */
+    private Long likeNum;
 
     /**
      * 歌手简介

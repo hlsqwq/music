@@ -14,7 +14,7 @@ import lombok.experimental.Accessors;
  * </p>
  *
  * @author hls
- * @since 2026-01-17
+ * @since 2026-01-27
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -36,29 +36,29 @@ public class WorksCategory implements Serializable {
     private Integer songId;
 
     /**
-     * 歌单id
+     * 歌手id
      */
-    private Integer songListId;
-
-    /**
-     * 专辑id
-     */
-    private Integer albumId;
+    private Integer singerId;
 
     /**
      * 标签1
      */
-    private String flag1;
+    private Integer flag1;
 
     /**
      * 标签2
      */
-    private String flag2;
+    private Integer flag2;
 
     /**
      * 标签3
      */
-    private String flag3;
+    private Integer flag3;
+
+    /**
+     * 热度信息
+     */
+    private Long hot;
 
 
 }
