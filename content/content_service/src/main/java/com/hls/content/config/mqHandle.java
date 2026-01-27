@@ -51,7 +51,9 @@ public class mqHandle {
     }
 
 
-    @RabbitListener(queues = mqConfig.HOT_SONG_QUEUE)
+    @RabbitListener(bindings = @QueueBinding(value = @Queue(name = mqConfig.HOT_SONG_QUEUE),
+            exchange = @Exchange(name = mqConfig.EXCHANGE, type = ExchangeTypes.DIRECT),
+            key = {mqConfig.HOT_SONG_KEY}))
     public void songHotQueue(Integer id) throws Exception {
         log.info("接收到消息：{}", id);
         if (id == null) {

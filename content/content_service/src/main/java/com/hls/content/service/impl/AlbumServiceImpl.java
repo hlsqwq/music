@@ -143,7 +143,7 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
             songService.updateBatchById(list);
             Singer byId1 = singerService.getById(byId.getSingerId());
             byId1.setAlbumNum(byId1.getAlbumNum() - 1);
-            byId1.setMvNum(byId1.getMvNum() - mvNum);
+            byId1.setMvNum((int) (byId1.getMvNum() - mvNum));
             byId1.setSongNum((byId1.getSongNum() - list.size()));
             singerService.updateById(byId1);
             SingerHot byId2 = singerHotService.getById(byId.getSingerId());

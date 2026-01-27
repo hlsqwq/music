@@ -1,6 +1,6 @@
 spring:
   application:
-    name: content
+    name: gateway
   profiles:
     active: dev
   cloud:
@@ -15,24 +15,33 @@ spring:
         group: music
         file-extension: yaml
         refresh-enabled: true
-        shared-configs:
-          - data-id: jdbc.yaml
-            group: music
-            refresh: true
-          - data-id: redis.yaml
-            group: music
-            refresh: true
-          - data-id: multipart.yaml
-            group: music
-            refresh: true
-          - data-id: mq.yaml
-            group: music
-            refresh: true
     config:
       override-none: true
-server:
-  servlet:
-    context-path: /content
+    gateway:
+      routes:
+        - id: content
+          uri: lb://content
+          predicates:
+            - Path=/content/**
+#
+#        - id: media
+#          uri: lb://media
+#          predicates:
+#            - Path=/api/media/**
+#          filters:
+#            - StripPrefix=2
+#        - id: auth
+#          uri: lb://auth
+#          predicates:
+#            - Path=/api/auth/**
+#          filters:
+#            - StripPrefix=2
+#        - id: search
+#          uri: lb://search
+#          predicates:
+#            - Path=/api/search/**
+#          filters:
+#            - StripPrefix=2
 
 
 #spring:
