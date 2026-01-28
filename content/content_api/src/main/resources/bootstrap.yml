@@ -30,9 +30,6 @@ spring:
             refresh: true
     config:
       override-none: true
-server:
-  servlet:
-    context-path: /content
 
 
 #spring:

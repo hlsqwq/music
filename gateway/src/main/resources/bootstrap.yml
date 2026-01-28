@@ -1,3 +1,4 @@
+
 spring:
   application:
     name: gateway
@@ -5,25 +6,18 @@ spring:
     active: dev
   cloud:
     nacos:
+      server-addr: 192.168.124.8:8848  # 服务注册的Nacos地址（必填）
       discovery:
-        server-addr: 192.168.124.8:8848  # 服务注册的Nacos地址（必填）
         namespace: public
         group: music
       config:
-        server-addr: 192.168.124.8:8848  # 配置中心的Nacos地址（必填）
         namespace: public
         group: music
         file-extension: yaml
         refresh-enabled: true
-    config:
-      override-none: true
-    gateway:
-      routes:
-        - id: content
-          uri: lb://content
-          predicates:
-            - Path=/content/**
-#
+
+
+
 #        - id: media
 #          uri: lb://media
 #          predicates:
@@ -43,6 +37,23 @@ spring:
 #          filters:
 #            - StripPrefix=2
 
+
+
+
+#    gateway:
+#      routes:
+#        - id: content
+#          uri: http://192.168.124.4:10010
+#          predicates:
+#            - Path=/content/**
+#          filters:
+#            - StripPrefix=1
+#        - id: baidu_route
+#          uri: https://www.baidu.com
+#          predicates:
+#            - Path=/baidu/**
+#          filters:
+#            - StripPrefix=1
 
 #spring:
 #  rabbitmq:
