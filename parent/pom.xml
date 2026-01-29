@@ -36,6 +36,7 @@
         <module>../content</module>
         <module>../media</module>
         <module>../gateway</module>
+        <module>../auth</module>
     </modules>
 
 
@@ -47,6 +48,20 @@
 
     <dependencyManagement>
         <dependencies>
+
+
+            <!-- Source: https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-security -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-security</artifactId>
+                <version>3.1.12</version>
+            </dependency>
+            <!-- Source: https://mvnrepository.com/artifact/org.springframework.security/spring-security-oauth2-authorization-server -->
+            <dependency>
+                <groupId>org.springframework.security</groupId>
+                <artifactId>spring-security-oauth2-authorization-server</artifactId>
+                <version>1.5.3</version>
+            </dependency>
 
             <!-- Source: https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-loadbalancer -->
             <dependency>
