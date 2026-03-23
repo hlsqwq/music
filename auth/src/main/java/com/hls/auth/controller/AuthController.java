@@ -60,6 +60,7 @@ public class AuthController {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(principal, credentials)
         );
+        //todo 存入redis
         return tokenUtils.getToken(authentication);
     }
 

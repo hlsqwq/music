@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: sms
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      server-addr: 192.168.124.8:8848
+      discovery:
+        namespace: public
+        group: music
+      config:
+        namespace: public
+        group: music
+        file-extension: yaml
+        refresh-enabled: true
+
+
