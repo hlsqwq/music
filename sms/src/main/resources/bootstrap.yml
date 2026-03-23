@@ -14,5 +14,9 @@ spring:
         group: music
         file-extension: yaml
         refresh-enabled: true
+        shared-configs:
+          - data-id: redis.yaml
+            group: music
+            refresh: true
 
 

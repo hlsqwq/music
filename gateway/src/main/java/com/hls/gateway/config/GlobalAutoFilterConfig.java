@@ -14,6 +14,8 @@ import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder;
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @RequiredArgsConstructor
@@ -21,18 +23,22 @@ import java.util.Objects;
 public class GlobalAutoFilterConfig {
 
     private final ReactiveJwtDecoder decode;
+    private static final List<String>white;
+    static {
+        white = new ArrayList<>();
+        white.add("/login");
+        white.add("/captcha");
+    }
 
     @Order(value = -100)
     @Bean
     public GlobalFilter globalFilter() {
         return (exchange, chain) -> {
-
             String path = exchange.getRequest().getURI().getPath();
-            if (path.contains("/login")) {
+            if (white.stream().anyMatch(path::contains)) {
                 return chain.filter(exchange);
             }
 
-            // todo  白名单
             String token = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
             if (token == null || !token.startsWith("Bearer ")) {
                 exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);

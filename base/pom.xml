@@ -32,10 +32,12 @@
             <artifactId>jackson-core</artifactId>
         </dependency>
 
-        <!-- Source: https://mvnrepository.com/artifact/cn.hutool/hutool-core -->
+
+
+        <!-- Source: https://mvnrepository.com/artifact/cn.hutool/hutool-all -->
         <dependency>
             <groupId>cn.hutool</groupId>
-            <artifactId>hutool-core</artifactId>
+            <artifactId>hutool-all</artifactId>
         </dependency>
 
         <!-- Source: https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-redis -->
