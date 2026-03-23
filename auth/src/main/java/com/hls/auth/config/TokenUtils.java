@@ -18,7 +18,7 @@ import java.util.Map;
 public class TokenUtils {
 
     private final JwtEncoder jwtEncoder;
-    private final JwtDecoder jwtDecoder;
+
 
     public LoginSuccessDto getToken(Authentication authentication) {
         String authorities = authentication.getAuthorities().toString();
@@ -48,15 +48,6 @@ public class TokenUtils {
         return loginSuccessDto;
     }
 
-//    @AuthenticationPrincipal Jwt jwt
-    public TokenInfo parseToken(String token) {
-        Jwt decode = jwtDecoder.decode(token);
-        Map<String, Object> claims = decode.getClaims();
 
-        TokenInfo tokenInfo = new TokenInfo();
-        tokenInfo.setAccount((String) claims.get("account"));
-        tokenInfo.setAccess(claims.get("access").toString());
-        return tokenInfo;
-    }
 
 }

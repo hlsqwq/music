@@ -5,6 +5,12 @@ import com.alibaba.fastjson2.JSON;
 import com.hls.auth.config.TokenUtils;
 import com.hls.auth.po.AuthParams;
 import com.hls.auth.po.LoginSuccessDto;
+import com.nimbusds.jose.KeySourceException;
+import com.nimbusds.jose.jwk.JWKMatcher;
+import com.nimbusds.jose.jwk.JWKSelector;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.proc.SecurityContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -36,6 +39,9 @@ public class AuthController {
     @Autowired
     private AuthenticationManager authenticationManager;
     private final TokenUtils tokenUtils;
+
+
+    private final JWKSource<SecurityContext> jwkSource;
 
     /**
      * 自定义登录接口
@@ -57,11 +63,10 @@ public class AuthController {
         return tokenUtils.getToken(authentication);
     }
 
-    /**
-     * 测试认证后的接口（需要登录后才能访问）
-     */
-    @PostMapping("/test/private")
-    public String testPrivate() {
-        return "这是需要认证后才能访问的私有接口！";
+
+    @GetMapping("/oauth2/jwks")
+    public Map<String, Object> jwks() throws KeySourceException {
+        JWKSelector jwkSelector = new JWKSelector(new JWKMatcher.Builder().build());
+        return new JWKSet(jwkSource.get(jwkSelector, null)).toJSONObject();
     }
 }

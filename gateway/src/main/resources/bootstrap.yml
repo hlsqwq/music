@@ -5,7 +5,7 @@ spring:
     active: dev
   cloud:
     nacos:
-      server-addr: 192.168.124.8:8848  # 服务注册的Nacos地址（必填）
+      server-addr: 192.168.124.8:8848
       discovery:
         namespace: public
         group: music
