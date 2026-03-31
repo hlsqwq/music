@@ -10,6 +10,7 @@ import com.hls.content.service.IAlbumService;
 import com.hls.content.service.ISingerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 /**
@@ -29,19 +30,20 @@ public class AlbumController {
 
 
     /**
-     *
-     * @param id    歌手id
-     * @param pageParam
-     * @return
+     * 获取歌手的专辑
+     * @param id 歌手 id
+     * @param order 排序字段 hot and createTime
+     * @param pageParam 分页信息
+     * @return 专辑
      */
     @GetMapping("/page/{id}")
-    public PageResult<Album> pageBySingerId(@PathVariable Long id, @RequestBody PageParam pageParam) {
-        return albumService.pageBySingerId(id, pageParam);
+    public PageResult<Album> pageBySingerId(@PathVariable Long id, String order, @RequestBody PageParam pageParam) {
+        return albumService.pageBySingerId(id, order, pageParam);
     }
 
     /**
      * 添加专辑
-     * 
+     *
      * @param albumDetailDto 专辑详细信息
      */
     @Access(value = "deputy")
@@ -52,7 +54,7 @@ public class AlbumController {
 
     /**
      * 删除专辑
-     * 
+     *
      * @param albumId 专辑id
      */
     @Access(value = "deputy")
@@ -63,7 +65,7 @@ public class AlbumController {
 
     /**
      * 修改专辑
-     * 
+     *
      * @param albumDetailDto 专辑信息
      */
     @Access(value = "deputy")
@@ -74,7 +76,7 @@ public class AlbumController {
 
     /**
      * 获取专辑详细信息
-     * 
+     *
      * @param albumId 专辑id
      * @return 专辑详细信息，包含歌曲列表
      */

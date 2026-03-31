@@ -14,22 +14,28 @@ public class R<T> {
     private T data;
 
 
-    public static R success(){
-        return new R(200,"ok",null);
+    public static R<Object> success() {
+        return new R<>(200, "ok", null);
     }
 
+    public static <T> R<T> success(T data) {
+        return new R<>(200, "ok", data);
+    }
 
-    public static R failure(){
-        return new R(500,"发生未知错误，请联系管理员",null);
+    public static R<Object> failure() {
+        return failure(600, "发生未知错误，请联系管理员", null);
     }
-    public static<T> R<T> failure(T data){
-        return new R(500,"ok",data);
+
+    public static <T> R<T> failure(String message) {
+        return failure(600, message, null);
     }
-    public static<T> R<T> failure(String message,T data){
-        return new R(500,message,data);
+
+    public static <T> R<T> failure(String message, T data) {
+        return failure(600, message, data);
     }
-    public static<T> R<T> failure(int code,String message,T data){
-        return new R(code,message,data);
+
+    public static <T> R<T> failure(int code, String message, T data) {
+        return new R<>(code, message, data);
     }
 
 }

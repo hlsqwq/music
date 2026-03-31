@@ -2,6 +2,7 @@ package com.hls.media.service;
 
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hls.base.R;
 import com.hls.media.po.Media;
 import io.minio.errors.*;
 
@@ -20,15 +21,24 @@ import java.security.NoSuchAlgorithmException;
 public interface IMediaService extends IService<Media> {
 
 
+    /**
+     * 检查文件是否上传
+     *
+     * @param fileMd5  文件MD5
+     * @param fileName 文件名
+     * @return 上传返回，ok，未上传，签证
+     */
+    String checkFile(String fileMd5, String fileName);
 
+    /**
+     * 检查分块文件是否存在
+     *
+     * @param id       分块索引
+     * @param chunkMd5 分块的MD5
+     * @param fileMd5  完整文件的MD5
+     * @return 如果存在返回 ok 不存在 签证 其他用户正在上传 busy
+     */
+    String checkChunk(Integer id, String chunkMd5, String fileMd5);
 
-    String checkFile(Integer userId, String fileMd5, String fileName) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException;
-
-    String checkChunk(Integer userId, Long id, String chunkMd5, String fileMd5) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException;
-
-    String merge(Integer userId, int total, String fileMd5, String fileName);
-
-    void del(String url);
-
-    void add(Media media);
+    R<Object> merge(int total, String fileMd5, String fileName);
 }

@@ -20,7 +20,6 @@ spring:
 
 
 
-
 #        - id: media
 #          uri: lb://media
 #          predicates:

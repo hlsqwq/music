@@ -1,7 +1,7 @@
 package com.hls.auth.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.hls.auth.po.User;
+import com.hls.base.po.User;
 
 
 /**

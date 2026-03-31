@@ -2,8 +2,8 @@ package com.hls.content.po;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
 import java.time.LocalDateTime;
+import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -15,7 +15,7 @@ import lombok.experimental.Accessors;
  * </p>
  *
  * @author hls
- * @since 2026-01-17
+ * @since 2026-03-29
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -32,27 +32,7 @@ public class TextInfo implements Serializable {
     private Integer id;
 
     /**
-     * 关联歌曲ID（歌词）
-     */
-    private Integer songId;
-
-    /**
-     * 关联歌手ID（歌手简介）
-     */
-    private Integer singerId;
-
-    /**
-     * 关联专辑ID（专辑简介）
-     */
-    private Integer albumId;
-
-    /**
-     * 创建用户ID
-     */
-    private Integer userId;
-
-    /**
-     * 文本内容（歌词/简介）
+     * 文本内容
      */
     private String content;
 

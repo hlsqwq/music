@@ -15,7 +15,7 @@ import lombok.experimental.Accessors;
  * </p>
  *
  * @author hls
- * @since 2026-01-17
+ * @since 2026-03-27
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -42,19 +42,39 @@ public class SongList implements Serializable {
     private Integer userId;
 
     /**
+     * 头像id
+     */
+    private Integer avatarId;
+
+    /**
      * 歌单封面URL
      */
-    private String avatar;
+    private String avatarUrl;
 
     /**
      * 播放数
      */
-    private Integer playNum;
+    private Long playNum;
 
     /**
-     * 点赞数
+     * 收藏数
      */
-    private Integer likeNum;
+    private Long favoriteNum;
+
+    /**
+     * 评论数
+     */
+    private Long commentNum;
+
+    /**
+     * 热度
+     */
+    private Long hot;
+
+    /**
+     * 长文本id
+     */
+    private Integer introductionId;
 
     /**
      * 歌单简介

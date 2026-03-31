@@ -2,7 +2,7 @@ package com.hls.auth.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-import com.hls.auth.po.User;
+import com.hls.base.po.User;
 import org.apache.ibatis.annotations.Mapper;
 
 /**

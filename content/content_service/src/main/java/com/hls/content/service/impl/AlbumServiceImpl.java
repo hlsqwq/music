@@ -4,29 +4,23 @@ import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.hls.base.MusicCd;
 import com.hls.base.PageParam;
 import com.hls.base.PageResult;
-import com.hls.base.Status;
-import com.hls.base.config.messageConfig;
-import com.hls.base.config.mqConfig;
-import com.hls.base.utils.mqUtils;
+import com.hls.base.config.MqConfig;
+import com.hls.base.utils.AuditState;
+import com.hls.base.utils.MqBase;
 import com.hls.content.dto.AlbumDetailDto;
 import com.hls.content.mapper.AlbumMapper;
 import com.hls.content.po.*;
 import com.hls.content.service.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.amqp.rabbit.connection.CorrelationData;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 /**
  * <p>
@@ -40,27 +34,33 @@ import java.util.UUID;
 @Service
 public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements IAlbumService {
 
-
-    private mqUtils mqUtils;
     private final ISongService songService;
     private final ISingerService singerService;
     private final IMvService mvService;
-    private final ISingerHotService singerHotService;
     private final ITextInfoService textInfoService;
+    private final ISingerHotService singerHotService;
+    private final MqBase mqBase;
     private final ApplicationContext applicationContext;
 
-
+    /**
+     * 获取歌手的专辑
+     *
+     * @param id        歌手 id
+     * @param order     排序字段 hot and createTime
+     * @param pageParam 分页信息
+     * @return 专辑
+     */
     @Override
-    public PageResult<Album> pageBySingerId(Long id, PageParam pageParam) {
+    public PageResult<Album> pageBySingerId(Long id, String order, PageParam pageParam) {
         Page<Album> page = Page.of(pageParam.getNum(), pageParam.getSize());
         LambdaQueryWrapper<Album> qw = new LambdaQueryWrapper<Album>()
                 .eq(Album::getSingerId, id)
-                .orderByDesc(Album::getCreateTime);
+                .orderByDesc(Objects.equals(order, "hot") ? Album::getHot : Album::getCreateTime);
         Page<Album> res = page(page, qw);
 
         PageResult<Album> albumPageResult = new PageResult<>();
-        albumPageResult.setNum(res.getCurrent());
-        albumPageResult.setSize(res.getSize());
+        albumPageResult.setNum(pageParam.getNum());
+        albumPageResult.setSize(pageParam.getSize());
         albumPageResult.setTotal(res.getTotal());
         albumPageResult.setItem(res.getRecords());
         return albumPageResult;
@@ -69,7 +69,8 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
     @Override
     public void addAlbum(AlbumDetailDto albumDetailDto) {
         applicationContext.getBean(AlbumServiceImpl.class).add(albumDetailDto);
-        mqUtils.addMedia(albumDetailDto.getAvatar());
+
+        // todo mq 同步 头像 media
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -89,41 +90,32 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
         singerService.updateById(byId);
 
         List<Song> songs = albumDetailDto.getSongs();
-        List<Song> list = songs.stream()
-                .filter(v -> v.getAlbum().isEmpty())
-                .filter(v->v.getStatus().equals(Status.pass))
-                .peek(song -> song.setAlbum(album.getName()))
-                .toList();
-        songService.updateBatchById(list);
-        long like = 0;
-        long play = 0;
-        for (Song song : list) {
-            like += song.getLikeNum();
-            play += song.getPlayNum();
+        for (int i = 0; i < songs.size(); i++) {
+            if (Objects.isNull(songs.get(i)) || songs.get(i).getStatus().equals(AuditState.pass)) {
+                songs.get(i).setAlbumId(album.getId());
+                songs.get(i).setAlbumName(album.getName());
+                songs.get(i).setAlbumOrder(i);
+            }
         }
-        SingerHot byId1 = singerHotService.getById(album.getSingerId());
-        singerHotService.refreshHot(albumDetailDto.getSingerId(),
-                byId1.getLikeNum() + like,
-                byId1.getPlayNum() + play);
+        songService.updateBatchById(songs);
     }
-
 
     @Override
     public void deleteAlbum(Long albumId) {
         Album byId = getById(albumId);
         AlbumServiceImpl bean = applicationContext.getBean(AlbumServiceImpl.class);
         bean.del(byId);
-        mqUtils.delMedia(byId.getAvatar());
+        mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY, byId.getAvatar());
     }
 
     @Transactional(rollbackFor = Exception.class)
-    protected void del(Album byId){
+    protected void del(Album byId) {
         if (byId == null) {
             return;
         }
         LambdaQueryWrapper<Song> eq = new LambdaQueryWrapper<Song>()
                 .eq(Song::getAlbum, byId.getName())
-                .eq(Song::getStatus, Status.pass);
+                .eq(Song::getStatus, AuditState.pass);
         List<Song> list = songService.list(eq);
         if (list != null && !list.isEmpty()) {
             Long playNum = 0L;
@@ -157,8 +149,6 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
         removeById(byId.getId());
     }
 
-
-
     @Transactional(rollbackFor = Exception.class)
     public void saveText(Album album) {
         TextInfo textInfo = new TextInfo();
@@ -169,17 +159,16 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
         textInfoService.save(textInfo);
     }
 
-
     @Override
     public void updateAlbum(AlbumDetailDto albumDetailDto) {
         Album byId = getById(albumDetailDto.getId());
-        if(byId == null){
+        if (byId == null) {
             return;
         }
         AlbumServiceImpl bean = applicationContext.getBean(AlbumServiceImpl.class);
-        if(!byId.getAvatar().equals(albumDetailDto.getAvatar())){
-            mqUtils.delMedia(byId.getAvatar());
-            mqUtils.addMedia(albumDetailDto.getAvatar());
+        if (!byId.getAvatar().equals(albumDetailDto.getAvatar())) {
+            mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY, byId.getAvatar());
+            // 这里可以添加添加媒体的逻辑，根据实际需求实现
         }
         bean.del(byId);
         bean.add(albumDetailDto);
@@ -193,7 +182,7 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
         }
         LambdaQueryWrapper<Song> eq = new LambdaQueryWrapper<Song>()
                 .eq(Song::getAlbum, album.getName())
-                .eq(Song::getStatus, Status.pass);
+                .eq(Song::getStatus, AuditState.pass);
         List<Song> list = songService.list(eq);
         AlbumDetailDto albumDetailDto = BeanUtil.copyProperties(album, AlbumDetailDto.class);
         albumDetailDto.setSongs(list);

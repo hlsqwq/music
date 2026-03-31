@@ -24,7 +24,9 @@ spring:
 
     config:
       override-none: true
-
+server:
+  servlet:
+    context-path: /auth
 
 
 key:

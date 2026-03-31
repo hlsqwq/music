@@ -10,10 +10,12 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder;
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -23,11 +25,14 @@ import java.util.Objects;
 public class GlobalAutoFilterConfig {
 
     private final ReactiveJwtDecoder decode;
-    private static final List<String>white;
+    private static final List<String> white;
+
     static {
         white = new ArrayList<>();
         white.add("/login");
         white.add("/captcha");
+        white.add("/v3/api-docs");
+        white.add("/swagger-ui");
     }
 
     @Order(value = -100)
@@ -52,7 +57,7 @@ public class GlobalAutoFilterConfig {
 
                         // 4. 将用户信息通过 Header 传递给下游微服务（mutate 模式）
                         ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
-                                .header("X-User-Id", userId)
+                                .header("UserId", userId)
                                 //todo 权限获取
 //                                .header("X-User-Roles", jwt.getClaimAsStringList("authorities")
 //                                        .toString())

@@ -40,8 +40,9 @@ spring:
     config:
       override-none: true
 
-
-PoPath: media
+server:
+  servlet:
+    context-path: /media
 
 
 

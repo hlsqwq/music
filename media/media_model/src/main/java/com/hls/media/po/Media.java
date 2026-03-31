@@ -1,13 +1,14 @@
 package com.hls.media.po;
 
-import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
-import java.time.LocalDateTime;
-import java.io.Serializable;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * <p>
@@ -15,7 +16,7 @@ import lombok.experimental.Accessors;
  * </p>
  *
  * @author hls
- * @since 2026-01-26
+ * @since 2026-03-30
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -29,7 +30,7 @@ public class Media implements Serializable {
     private Integer id;
 
     /**
-     * 上传用户ID
+     * 第一个上传的用户id
      */
     private Integer userId;
 
@@ -48,8 +49,16 @@ public class Media implements Serializable {
      */
     private String url;
 
-    private String fileName;
+    /**
+     * 文件名
+     */
+    private String name;
 
+    private String type;
+
+    /**
+     * 文件的MD5
+     */
     private String md5;
 
     /**
@@ -61,11 +70,6 @@ public class Media implements Serializable {
      * 文件大小
      */
     private Integer size;
-
-    /**
-     * 引用次数
-     */
-    private Integer refNum;
 
     /**
      * 创建时间

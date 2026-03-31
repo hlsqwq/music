@@ -4,28 +4,24 @@ import com.alibaba.otter.canal.client.CanalConnector;
 import com.alibaba.otter.canal.protocol.CanalEntry.*;
 import com.alibaba.otter.canal.protocol.Message;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.hls.base.utils.WorksCateTopN;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
 @Component
-// 移除@RequiredArgsConstructor，改为手动创建CanalConnector（避免注入失败）
 public class CannalClient implements InitializingBean {
 
     private final static int BATCH_SIZE = 1000;
 
     private final CanalConnector connector;
-    private final WorksCateTopN worksCateTopN;
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         // 把监听逻辑放到独立线程，避免阻塞Spring容器启动
         new Thread(this::startCanalListener, "canal-listener-thread").start();
     }
@@ -57,7 +53,7 @@ public class CannalClient implements InitializingBean {
                     }
 
                     // 处理数据变更
-                    singer_top(message.getEntries());
+                    processDataChange(message.getEntries());
                     // 确认消息消费
                     connector.ack(batchId);
                 }
@@ -88,69 +84,25 @@ public class CannalClient implements InitializingBean {
         }
     }
 
-
     /**
-     * key  categoryId_id_song/singer
-     * value    id(songId/singerId)
-     * score    hot
+     * 处理数据变更，同步到Redis和ES
      *
      * @param entrys
      * @throws InvalidProtocolBufferException
      */
-    public void singer_top(List<Entry> entrys) throws InvalidProtocolBufferException {
+    public void processDataChange(List<Entry> entrys) throws InvalidProtocolBufferException {
         for (Entry entry : entrys) {
-            if (entry.getEntryType() == EntryType.TRANSACTIONEND || entry.getEntryType() == EntryType.TRANSACTIONBEGIN) {
+            if (entry.getEntryType() == EntryType.TRANSACTIONEND
+                    || entry.getEntryType() == EntryType.TRANSACTIONBEGIN) {
                 continue;
             }
-            if (!entry.getHeader().getTableName().equals("works_category")) {
-                continue;
-            }
-            RowChange rowChange = RowChange.parseFrom(entry.getStoreValue());
-            EventType eventType = rowChange.getEventType();
-            String prev = "category_";
 
-            for (RowData rowData : rowChange.getRowDatasList()) {
-                if (eventType == EventType.DELETE) {
-                    List<Column> list = rowData.getBeforeColumnsList();
-                    String type = "";
-                    int id = 0;
-                    if (list.get(1).getValue().isEmpty()) {
-                        type = "singer";
-                        id = Integer.parseInt(list.get(2).getValue());
-                    } else {
-                        type = "song";
-                        id = Integer.parseInt(list.get(1).getValue());
-                    }
-                    if (!list.get(3).getValue().isEmpty()) {
-                        worksCateTopN.delete(prev + list.get(3).getValue() + "_" + type, id);
-                    } else if (!list.get(4).getValue().isEmpty()) {
-                        worksCateTopN.delete(prev + list.get(4).getValue() + "_" + type, id);
-                    } else if (!list.get(5).getValue().isEmpty()) {
-                        worksCateTopN.delete(prev + list.get(5).getValue() + "_" + type, id);
-                    }
-                } else if (eventType == EventType.INSERT) {
-                    List<Column> list = rowData.getAfterColumnsList();
-                    String type = "";
-                    int id = 0;
-                    if (list.get(1).getValue().isEmpty()) {
-                        type = "singer";
-                        id = Integer.parseInt(list.get(2).getValue());
-                    } else {
-                        type = "song";
-                        id = Integer.parseInt(list.get(1).getValue());
-                    }
-                    if (!list.get(3).getValue().isEmpty()) {
-                        worksCateTopN.add(prev + list.get(3).getValue() + "_" + type, id, Double.parseDouble(list.get(6).getValue()));
-                    } else if (!list.get(4).getValue().isEmpty()) {
-                        worksCateTopN.add(prev + list.get(4).getValue() + "_" + type, id, Double.parseDouble(list.get(6).getValue()));
-                    } else if (!list.get(5).getValue().isEmpty()) {
-                        worksCateTopN.add(prev + list.get(5).getValue() + "_" + type, id, Double.parseDouble(list.get(6).getValue()));
-                    }
-                }
-            }
+            String tableName = entry.getHeader().getTableName();
+
+            // 处理song、singer、album、mv表，同步到ES
+            //todo es
         }
     }
-
 
 
 }

@@ -1,7 +1,6 @@
 package com.hls.content.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.hls.content.po.Audit;
 import org.apache.ibatis.annotations.Mapper;
 
 /**

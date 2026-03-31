@@ -15,7 +15,7 @@ import lombok.experimental.Accessors;
  * </p>
  *
  * @author hls
- * @since 2026-01-17
+ * @since 2026-03-27
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -37,25 +37,36 @@ public class Album implements Serializable {
     private Integer singerId;
 
     /**
-     * 上传用户ID
-     */
-    private Integer userId;
-
-
-    /**
      * 专辑名
      */
     private String name;
 
+    private Integer avatarId;
+
     /**
-     * 专辑封面URL
+     * 头像
      */
-    private String avatar;
+    private String avatarUrl;
+
+    /**
+     * 收藏
+     */
+    private Long favoriteNum;
+
+    /**
+     * 热度
+     */
+    private Long hot;
 
     /**
      * 专辑简介
      */
     private String introduction;
+
+    /**
+     * 长文本id
+     */
+    private Integer introductionId;
 
     /**
      * 创建时间

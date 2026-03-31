@@ -18,4 +18,6 @@ public interface SmsClient {
      */
     @GetMapping("/sms/captcha/validate")
     boolean captchaValidate(String key,String code);
+
+
 }

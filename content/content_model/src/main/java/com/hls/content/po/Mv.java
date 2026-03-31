@@ -2,8 +2,8 @@ package com.hls.content.po;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
-import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.TableId;
+import java.time.LocalDateTime;
 import java.io.Serializable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -15,7 +15,7 @@ import lombok.experimental.Accessors;
  * </p>
  *
  * @author hls
- * @since 2026-01-26
+ * @since 2026-03-27
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -26,15 +26,10 @@ public class Mv implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * 歌曲id
+     * id
      */
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
-
-    /**
-     * 歌手id
-     */
-    private Integer singerId;
 
     /**
      * mv名称
@@ -42,14 +37,44 @@ public class Mv implements Serializable {
     private String name;
 
     /**
+     * 媒资id
+     */
+    private Integer videoId;
+
+    /**
      * 视频源
      */
     private String video;
 
     /**
+     * 歌曲id
+     */
+    private Integer songId;
+
+    /**
+     * 歌手id
+     */
+    private Integer singerId;
+
+    /**
+     * 歌手名称
+     */
+    private String singerName;
+
+    /**
+     * 封面id
+     */
+    private Integer avatarId;
+
+    /**
      * 封面
      */
-    private String avatar;
+    private String avatarUrl;
+
+    /**
+     * 分类id
+     */
+    private Integer categoryId;
 
     /**
      * 审核状态
@@ -62,19 +87,24 @@ public class Mv implements Serializable {
     private Long playNum;
 
     /**
-     * 评论数
-     */
-    private Long commentNum;
-
-    /**
      * 点赞数
      */
     private Long likeNum;
 
     /**
-     * 上传者
+     * 评论数
      */
-    private Integer userId;
+    private Long commentNum;
+
+    /**
+     * 收藏数
+     */
+    private Long favoriteNum;
+
+    /**
+     * 热度
+     */
+    private Long hot;
 
     private LocalDateTime createTime;
 

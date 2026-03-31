@@ -1,12 +1,11 @@
 package com.hls.auth.service.impl;
 
 import com.hls.auth.po.AuthParams;
-import com.hls.auth.po.User;
+import com.hls.base.po.User;
 import com.hls.auth.service.Auth;
 import com.hls.auth.service.IUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

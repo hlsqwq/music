@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: search
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.124.8:8848  # 服务注册的Nacos地址（必填）
+        namespace: public
+        group: music
+      config:
+        server-addr: 192.168.124.8:8848  # 配置中心的Nacos地址（必填）
+        namespace: public
+        group: music
+        file-extension: yaml
+        refresh-enabled: true
+    config:
+      override-none: true
+  elasticsearch:
+    uris: http://192.168.124.8:9200
+

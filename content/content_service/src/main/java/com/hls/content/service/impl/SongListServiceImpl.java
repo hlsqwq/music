@@ -1,16 +1,11 @@
 package com.hls.content.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.hls.base.utils.mqUtils;
 import com.hls.content.dto.SongListDto;
 import com.hls.content.mapper.SongListMapper;
-import com.hls.content.mapper.TextInfoMapper;
 import com.hls.content.po.Song;
 import com.hls.content.po.SongList;
-import com.hls.content.po.SongSongList;
-import com.hls.content.po.TextInfo;
 import com.hls.content.service.ISongListService;
 import com.hls.content.service.ISongService;
 import com.hls.content.service.ISongSongListService;
@@ -18,8 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -35,7 +28,6 @@ import java.util.List;
 public class SongListServiceImpl extends ServiceImpl<SongListMapper, SongList> implements ISongListService {
 
 
-    private final mqUtils mqUtils;
     private final ISongSongListService songSongListService;
     private final ISongService songService;
 

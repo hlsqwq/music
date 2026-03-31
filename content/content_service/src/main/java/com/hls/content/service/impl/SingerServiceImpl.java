@@ -1,20 +1,17 @@
 package com.hls.content.service.impl;
 
-
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hls.base.exception.MusicException;
+import com.hls.content.utils.RedisHotUtil;
 import com.hls.base.utils.WorksCateTopN;
-import com.hls.base.utils.mqUtils;
 import com.hls.content.dto.EditSingerDto;
 import com.hls.content.dto.SingerDto;
 import com.hls.content.mapper.SingerMapper;
 import com.hls.content.po.Singer;
-import com.hls.content.po.SingerHot;
 import com.hls.content.po.TextInfo;
-import com.hls.content.service.ISingerHotService;
 import com.hls.content.service.ISingerService;
 import com.hls.content.service.ISongService;
 import com.hls.content.service.ITextInfoService;
@@ -39,29 +36,29 @@ import java.util.Set;
 @Service
 public class SingerServiceImpl extends ServiceImpl<SingerMapper, Singer> implements ISingerService {
 
-
     private final WorksCateTopN worksCateTopN;
     private final ISongService songService;
     private final ITextInfoService textInfoService;
     private final ISingerHotService singerHotService;
     private final mqUtils mqUtils;
+    private final RedisHotUtil redisHotUtil;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void add_singer(SingerDto singerDto) {
-        if(singerDto==null){
+        if (singerDto == null) {
             MusicException.cast("对象不可为空");
             return;
         }
         String introduction = singerDto.getIntroduction();
-        if(introduction!=null && introduction.length()>50){
+        if (introduction != null && introduction.length() > 50) {
             singerDto.setIntroduction(introduction.substring(0, 50));
         }
         Singer singer = BeanUtil.copyProperties(singerDto, Singer.class);
         singer.setCreateTime(LocalDateTime.now());
         save(singer);
 
-        saveText(singer.getId(),introduction);
+        saveText(singer.getId(), introduction);
         SingerHot singerHot = new SingerHot();
         singerHot.setId(singer.getId());
         singerHotService.save(singerHot);
@@ -73,8 +70,8 @@ public class SingerServiceImpl extends ServiceImpl<SingerMapper, Singer> impleme
         TextInfo textInfo = new TextInfo();
         textInfo.setSingerId(id);
         textInfo.setContent(introduction);
-        //todo
-//        textInfo.setUserId()
+        // todo
+        // textInfo.setUserId()
         textInfo.setCreateTime(LocalDateTime.now());
         textInfoService.save(textInfo);
     }
@@ -83,17 +80,17 @@ public class SingerServiceImpl extends ServiceImpl<SingerMapper, Singer> impleme
     @Override
     public void update_singer(EditSingerDto editSingerDto) {
         Singer byId = getById(editSingerDto.getId());
-        if(byId.getAvatar()!=null && byId.getAvatar().equals(editSingerDto.getAvatar())){
+        if (byId.getAvatar() != null && byId.getAvatar().equals(editSingerDto.getAvatar())) {
             mqUtils.delMedia(byId.getAvatar());
             mqUtils.addMedia(editSingerDto.getAvatar());
         }
-        if(editSingerDto.getIntroduction()!=null &&
-                !editSingerDto.getIntroduction().equals(byId.getIntroduction()) ){
+        if (editSingerDto.getIntroduction() != null &&
+                !editSingerDto.getIntroduction().equals(byId.getIntroduction())) {
             LambdaQueryWrapper<TextInfo> qw = new LambdaQueryWrapper<TextInfo>()
                     .eq(TextInfo::getSingerId, byId.getId());
             textInfoService.remove(qw);
-            if(editSingerDto.getIntroduction().length()>50){
-                saveText(editSingerDto.getId(),editSingerDto.getIntroduction());
+            if (editSingerDto.getIntroduction().length() > 50) {
+                saveText(editSingerDto.getId(), editSingerDto.getIntroduction());
             }
         }
         BeanUtil.copyProperties(editSingerDto, byId, CopyOptions.create().setIgnoreNullValue(true));
@@ -122,7 +119,7 @@ public class SingerServiceImpl extends ServiceImpl<SingerMapper, Singer> impleme
         LambdaQueryWrapper<TextInfo> qw = new LambdaQueryWrapper<TextInfo>()
                 .eq(TextInfo::getSingerId, byId.getId());
         textInfoService.remove(qw);
-        if(byId.getAvatar()!=null){
+        if (byId.getAvatar() != null) {
             mqUtils.delMedia(byId.getAvatar());
         }
         removeById(id);

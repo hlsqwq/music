@@ -13,22 +13,22 @@ public class deadExchageConfig {
 
     @Bean
     public DirectExchange exchange() {
-        return ExchangeBuilder.directExchange(mqConfig.DEAD_EXCHANGE).build();
+        return ExchangeBuilder.directExchange(MqConfig.DEAD_EXCHANGE).build();
     }
 
     @Bean
     public Queue queue() {
-        return QueueBuilder.durable(mqConfig.DEAD_QUEUE).build();
+        return QueueBuilder.durable(MqConfig.DEAD_QUEUE).build();
     }
 
     @Bean
     public Binding bind(Queue queue, DirectExchange exchange) {
-        return BindingBuilder.bind(queue).to(exchange).with(mqConfig.DEAD_KEY);
+        return BindingBuilder.bind(queue).to(exchange).with(MqConfig.DEAD_KEY);
     }
 
 
     @Bean
     public MessageRecoverer messageRecoverer(RabbitTemplate rabbitTemplate) {
-        return new RepublishMessageRecoverer(rabbitTemplate, mqConfig.DEAD_EXCHANGE, mqConfig.DEAD_KEY);
+        return new RepublishMessageRecoverer(rabbitTemplate, MqConfig.DEAD_EXCHANGE, MqConfig.DEAD_KEY);
     }
 }

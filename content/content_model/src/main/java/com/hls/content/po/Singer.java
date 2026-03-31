@@ -1,13 +1,15 @@
 package com.hls.content.po;
 
-import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
-import java.time.LocalDateTime;
-import java.io.Serializable;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
 
 /**
  * <p>
@@ -15,7 +17,7 @@ import lombok.experimental.Accessors;
  * </p>
  *
  * @author hls
- * @since 2026-01-27
+ * @since 2026-03-28
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -37,9 +39,16 @@ public class Singer implements Serializable {
     private String name;
 
     /**
+     * 分类
+     */
+    private Integer categoryId;
+
+    private Integer avatarId;
+
+    /**
      * 封面
      */
-    private String avatar;
+    private String avatarUrl;
 
     /**
      * 发布歌曲数量
@@ -57,14 +66,19 @@ public class Singer implements Serializable {
     private Integer mvNum;
 
     /**
-     * 播放量
+     * 粉丝数
      */
-    private Long playNum;
+    private Long fansNum;
 
     /**
-     * 点赞数
+     * 热度
      */
-    private Long likeNum;
+    private Long hot;
+
+    /**
+     * 长简介id
+     */
+    private Integer introductionId;
 
     /**
      * 歌手简介

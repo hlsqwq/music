@@ -18,8 +18,6 @@ public class MinioConfig {
 
     @Value("${minio.bucket.music}")
     public String music;
-    @Value("${minio.bucket.temp}")
-    public String temp;
 
 
     @Bean

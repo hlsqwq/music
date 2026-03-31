@@ -1,9 +1,9 @@
 package com.hls.content.po;
 
-import cn.hutool.core.date.DateTime;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import java.time.LocalTime;
 import java.time.LocalDateTime;
 import java.io.Serializable;
 import lombok.Data;
@@ -16,7 +16,7 @@ import lombok.experimental.Accessors;
  * </p>
  *
  * @author hls
- * @since 2026-01-17
+ * @since 2026-03-29
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -38,14 +38,24 @@ public class Song implements Serializable {
     private Integer singerId;
 
     /**
-     * 上传用户ID
+     * 歌手名
      */
-    private Integer userId;
+    private String singerName;
+
+    /**
+     * 歌词（长文本id）
+     */
+    private Integer lyricId;
+
+    /**
+     * 音源id
+     */
+    private Integer musicId;
 
     /**
      * 音源
      */
-    private String music;
+    private String musicUrl;
 
     /**
      * 歌曲名称
@@ -53,37 +63,59 @@ public class Song implements Serializable {
     private String name;
 
     /**
-     * 歌曲封面媒体id
+     * 媒体id
      */
-    private Long avatar;
+    private Integer avatarId;
 
     /**
-     * 专辑名
+     * 媒体url
      */
-    private String album;
+    private String avatarUrl;
 
     /**
-     * 持续时长
+     * 专辑id
      */
-    private DateTime duration;
-
+    private Integer albumId;
 
     /**
-     * 点赞数
+     * 专辑名称
      */
-    private Long likeNum;
-
+    private String albumName;
 
     /**
-     * 播放数
+     * 专辑中的序号
+     */
+    private Integer albumOrder;
+
+    /**
+     * 持续时间
+     */
+    private LocalTime duration;
+
+    /**
+     * 收藏数
+     */
+    private Long favoriteNum;
+
+    /**
+     * 播放量
      */
     private Long playNum;
-
 
     /**
      * 评论数
      */
     private Long commentNum;
+
+    /**
+     * 热度
+     */
+    private Long hot;
+
+    /**
+     * 长文本id
+     */
+    private Integer introductionId;
 
     /**
      * 歌曲简介

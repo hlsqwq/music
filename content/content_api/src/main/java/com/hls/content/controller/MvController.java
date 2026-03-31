@@ -24,6 +24,12 @@ public class MvController {
 
     private final IMvService mvService;
 
+    /**
+     *
+     * @param id 歌手id
+     * @param pageParam
+     * @return
+     */
     @GetMapping("page/{id}")
     public PageResult<Mv> pageBySinger(@PathVariable Long id, @RequestBody PageParam pageParam) {
         return mvService.pageBySinger(id, pageParam);
@@ -62,16 +68,6 @@ public class MvController {
         mvService.updateMv(mv);
     }
 
-    /**
-     * 获取MV详情
-     * 
-     * @param mvId MV ID
-     * @return MV详情
-     */
-    @GetMapping("/detail/{mvId}")
-    public Mv getMvDetail(@PathVariable Integer mvId) {
-        return mvService.getMvDetail(mvId);
-    }
 
     /**
      * 获取MV列表

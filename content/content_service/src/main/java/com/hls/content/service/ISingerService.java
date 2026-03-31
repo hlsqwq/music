@@ -25,4 +25,20 @@ public interface ISingerService extends IService<Singer> {
     List<EditSingerDto> getTop10(int id);
 
     void del_singer(Integer id);
+
+    /**
+     * 增加歌手播放量
+     * 
+     * @param singerId 歌手ID
+     * @return 增加后的播放量
+     */
+    Long incrPlayNum(Integer singerId);
+
+    /**
+     * 增加歌手点赞数
+     * 
+     * @param singerId 歌手ID
+     * @return 增加后的点赞数
+     */
+    Long incrLikeNum(Integer singerId);
 }

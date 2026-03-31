@@ -27,12 +27,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 认证接口控制器（前后端分离登录）
+ * 认证接口控制器  有前缀   /auth
  */
 @RequiredArgsConstructor
 @Slf4j
 @RestController
-@RequestMapping("/auth")
 public class AuthController {
 
     // 注入认证管理器（在 SecurityConfig 中配置的）
@@ -60,6 +59,9 @@ public class AuthController {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(principal, credentials)
         );
+
+        //todo 验证码
+
         //todo 存入redis
         return tokenUtils.getToken(authentication);
     }

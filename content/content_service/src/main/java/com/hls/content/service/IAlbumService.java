@@ -5,7 +5,6 @@ import com.hls.base.PageParam;
 import com.hls.base.PageResult;
 import com.hls.content.dto.AlbumDetailDto;
 import com.hls.content.po.Album;
-import java.util.List;
 
 /**
  * <p>
@@ -17,7 +16,15 @@ import java.util.List;
  */
 public interface IAlbumService extends IService<Album> {
 
-    PageResult<Album> pageBySingerId(Long id, PageParam pageParam);
+
+    /**
+     * 获取歌手的专辑
+     * @param id 歌手 id
+     * @param order 排序字段 hot and createTime
+     * @param pageParam 分页信息
+     * @return 专辑
+     */
+    PageResult<Album> pageBySingerId(Long id, String order, PageParam pageParam);
 
     /**
      * 添加专辑
@@ -47,6 +54,5 @@ public interface IAlbumService extends IService<Album> {
      * @return 专辑详细信息，包含歌曲列表
      */
     AlbumDetailDto getAlbumDetail(Long albumId);
-
 
 }

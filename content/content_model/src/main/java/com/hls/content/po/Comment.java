@@ -3,13 +3,11 @@ package com.hls.content.po;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import java.time.LocalDateTime;
+import java.io.Serializable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
-
-import java.time.LocalDateTime;
-import java.io.Serializable;
-
 
 /**
  * <p>
@@ -17,7 +15,7 @@ import java.io.Serializable;
  * </p>
  *
  * @author hls
- * @since 2026-01-17
+ * @since 2026-03-28
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -34,14 +32,14 @@ public class Comment implements Serializable {
     private Integer id;
 
     /**
-     * 关联歌曲ID
+     * 对象类型
      */
-    private Integer songId;
+    private String objType;
 
     /**
-     * 关联歌单ID
+     * 关联ID
      */
-    private Integer songListId;
+    private Integer typeId;
 
     /**
      * 评论用户ID
@@ -54,14 +52,29 @@ public class Comment implements Serializable {
     private String content;
 
     /**
-     * 父评论ID（0为一级评论）
+     * 长文本id
+     */
+    private Integer longTextId;
+
+    /**
+     * 一级评论id
+     */
+    private Integer rootId;
+
+    /**
+     * 回复id
      */
     private Integer parentId;
 
     /**
      * 评论点赞数
      */
-    private Integer likeNum;
+    private Long likeNum;
+
+    /**
+     * 热度
+     */
+    private Long hot;
 
     /**
      * 创建时间

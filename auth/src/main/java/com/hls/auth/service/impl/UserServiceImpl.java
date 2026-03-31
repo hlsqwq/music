@@ -5,8 +5,8 @@ package com.hls.auth.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import com.hls.auth.mapper.UserMapper;
-import com.hls.auth.po.User;
 import com.hls.auth.service.IUserService;
+import com.hls.base.po.User;
 import org.springframework.stereotype.Service;
 
 /**
