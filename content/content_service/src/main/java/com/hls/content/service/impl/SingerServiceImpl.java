@@ -1,12 +1,14 @@
 package com.hls.content.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.bean.copier.CopyOptions;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hls.base.R;
 import com.hls.base.config.MqConfig;
 import com.hls.base.exception.MusicException;
 import com.hls.base.utils.MqBase;
+import com.hls.base.utils.RedisBase;
+import com.hls.base.utils.RedisKeys;
 import com.hls.content.dto.EditSingerDto;
 import com.hls.content.dto.SingerDto;
 import com.hls.content.mapper.SingerMapper;
@@ -21,10 +23,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * <p>
@@ -43,6 +42,8 @@ public class SingerServiceImpl extends ServiceImpl<SingerMapper, Singer> impleme
     private final RedisHotUtil redisHotUtil;
     private final MqBase mqBase;
     private final ApplicationContext applicationContext;
+    private final RedisKeys  redisKeys;
+    private final RedisBase  redisBase;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -72,19 +73,24 @@ public class SingerServiceImpl extends ServiceImpl<SingerMapper, Singer> impleme
         bean.add_singer(editSingerDto);
     }
 
+    /**
+     * 获取top10歌手
+     *
+     * @param id 分类id
+     * @return list<singer>
+     */
     @Override
-    public List<EditSingerDto> getTop10(int id) {
-
-        Set set = worksCateTopN.getTopN("category_" + id + "_singer", 10);
-        ArrayList<Integer> arr = new ArrayList<>();
-        for (Object o : set) {
-            arr.add((Integer) o);
-        }
-        LambdaQueryWrapper<Singer> in = new LambdaQueryWrapper<Singer>().in(Singer::getId, arr);
-        List<Singer> singers = list(in);
-        return singers.stream()
-                .map(v -> BeanUtil.copyProperties(v, EditSingerDto.class))
+    public R<Object> getTop10(int id) {
+        String singerTop = redisKeys.getSingerTop(id);
+        List<Integer> ids = redisBase.getTopN(singerTop, 10).stream()
+                .map(String::valueOf)
+                .map(Integer::parseInt)
                 .toList();
+        if(ids.isEmpty()){
+            //todo 重新计算
+            return R.failure("等待重试");
+        }
+        return R.success(listByIds(ids));
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -100,6 +106,10 @@ public class SingerServiceImpl extends ServiceImpl<SingerMapper, Singer> impleme
                 new com.hls.base.dto.DelTempMedia(null,"music",substring));
         removeById(id);
     }
+
+
+
+
 
 
 }

@@ -1,6 +1,7 @@
 package com.hls.content.controller;
 
 
+import com.hls.base.R;
 import com.hls.content.dto.EditSingerDto;
 import com.hls.content.dto.SingerDetailDto;
 import com.hls.content.dto.SingerDto;
@@ -68,11 +69,12 @@ public class SingerController {
 
     /**
      * 获取top10歌手
+     *
      * @param id 分类id
-     * @return
+     * @return list<singer>
      */
     @GetMapping("/top10")
-    public List<EditSingerDto> getTop10(int id) {
+    public R<Object> getTop10(int id) {
         return singerService.getTop10(id);
     }
 

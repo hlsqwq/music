@@ -1,6 +1,7 @@
 package com.hls.content.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hls.base.R;
 import com.hls.content.dto.EditSingerDto;
 import com.hls.content.dto.SingerDetailDto;
 import com.hls.content.dto.SingerDto;
@@ -22,7 +23,13 @@ public interface ISingerService extends IService<Singer> {
 
     void update_singer(EditSingerDto editSingerDto);
 
-    List<EditSingerDto> getTop10(int id);
+    /**
+     * 获取top10歌手
+     *
+     * @param id 分类id
+     * @return list<singer>
+     */
+    R<Object> getTop10(int id);
 
     void del_singer(Integer id);
 }

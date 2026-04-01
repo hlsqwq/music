@@ -18,7 +18,6 @@ public class RedisHotUtil {
 
 
     private final RedisTemplate<String, Object> redisTemplate;
-    private final DefaultRedisScript<Integer> hotTask;
     private final RedisBase redisBase;
 
     /**

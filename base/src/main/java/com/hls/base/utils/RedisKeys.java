@@ -25,6 +25,7 @@ public class RedisKeys {
         getCommentList("commentList"),
         getCommentFlag("getCommentFlag"),
         checkFile("checkFile"),
+        singerTop("singerTop"),
         favorite("favorite");
         private final String doName;
     }
@@ -42,6 +43,23 @@ public class RedisKeys {
         private final String tableName;
     }
 
+
+    /**
+     * 获取歌手的排行榜信息
+     * @param id 分类id
+     * @return
+     */
+    public String getSingerTop(Integer id){
+        if(id == null){
+            //代表总榜单
+            id=0;
+        }
+        return redisBase.getKey(DoType.singerTop.getDoName(), TableType.singer.getTableName(),id);
+    }
+
+    public String getSongTop(){
+        return redisBase.getKey(DoType.singerTop.getDoName(), TableType.singer.getTableName());
+    }
 
     /**
      * 检查文件或分块是否存在
