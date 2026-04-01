@@ -44,4 +44,11 @@ public interface ISingerService extends IService<Singer> {
      * @return 更新后的粉丝数 long
      */
     R<Object> follow(Integer singerId);
+
+    /**
+     * 取消关注
+     * @param singerId 歌手id
+     * @return 更新后的粉丝数 long
+     */
+    R<Object> unfollow(Integer singerId);
 }

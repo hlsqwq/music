@@ -101,6 +101,16 @@ public class SingerController {
         return singerService.follow(singerId);
     }
 
+    /**
+     * 取消关注
+     * @param singerId 歌手id
+     * @return 更新后的粉丝数 long
+     */
+    @PostMapping("/unfollow/{singerId}")
+    public R<Object> unfollow(@PathVariable Integer singerId) {
+        return singerService.unfollow(singerId);
+    }
+
 
 
 

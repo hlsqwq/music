@@ -41,9 +41,7 @@ import java.util.concurrent.locks.Lock;
 @Service
 public class SingerServiceImpl extends ServiceImpl<SingerMapper, Singer> implements ISingerService {
 
-    private final ISongService songService;
     private final ITextInfoService textInfoService;
-    private final RedisHotUtil redisHotUtil;
     private final MqBase mqBase;
     private final ApplicationContext applicationContext;
     private final RedisKeys redisKeys;
@@ -133,6 +131,9 @@ public class SingerServiceImpl extends ServiceImpl<SingerMapper, Singer> impleme
             }
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
+        } finally {
+            if (lock1.isHeldByCurrentThread())
+                lock1.unlock();
         }
         num = redisBase.get(key, Long.class);
         if (num == null) {
@@ -158,6 +159,32 @@ public class SingerServiceImpl extends ServiceImpl<SingerMapper, Singer> impleme
             return R.success(n);
         }
         return R.success(increment);
+    }
+
+
+    /**
+     * 取消关注
+     * @param singerId 歌手id
+     * @return 更新后的粉丝数 long
+     */
+    @Override
+    public R<Object> unfollow(Integer singerId) {
+        String key = redisKeys.getSingerFans(singerId);
+        String lock = redisBase.getKey("lock", "unfollow:singer", singerId);
+        RLock lock1 = redissonClient.getLock(lock);
+        if (lock1.tryLock()) {
+            if (redisBase.exist(key)) {
+                Long decrement = redisBase.decrement(key);
+                return R.success(decrement);
+            }
+            Singer byId = getById(singerId);
+            if (byId.getFansNum() > 0) {
+                redisBase.set(key, byId.getFansNum() - 1);
+                return R.success(byId.getFansNum() - 1);
+            }
+            return R.failure();
+        }
+        return R.failure("请重试");
     }
 
 
