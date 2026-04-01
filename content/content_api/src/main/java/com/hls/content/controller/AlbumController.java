@@ -31,13 +31,14 @@ public class AlbumController {
 
     /**
      * 获取歌手的专辑
-     * @param id 歌手 id
-     * @param order 排序字段 hot and createTime
+     *
+     * @param id        歌手 id
+     * @param order     排序字段 hot and createTime
      * @param pageParam 分页信息
      * @return 专辑
      */
     @GetMapping("/page/{id}")
-    public PageResult<Album> pageBySingerId(@PathVariable Long id, String order, @RequestBody PageParam pageParam) {
+    public PageResult<Album> pageBySingerId(@PathVariable Integer id, String order, @RequestBody PageParam pageParam) {
         return albumService.pageBySingerId(id, order, pageParam);
     }
 
@@ -59,7 +60,7 @@ public class AlbumController {
      */
     @Access(value = "deputy")
     @DeleteMapping("/delete/{albumId}")
-    public void deleteAlbum(@PathVariable Long albumId) {
+    public void deleteAlbum(@PathVariable Integer albumId) {
         albumService.deleteAlbum(albumId);
     }
 
@@ -81,7 +82,7 @@ public class AlbumController {
      * @return 专辑详细信息，包含歌曲列表
      */
     @GetMapping("/detail/{albumId}")
-    public AlbumDetailDto getAlbumDetail(@PathVariable Long albumId) {
+    public AlbumDetailDto getAlbumDetail(@PathVariable Integer albumId) {
         return albumService.getAlbumDetail(albumId);
     }
 

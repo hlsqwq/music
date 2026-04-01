@@ -54,7 +54,6 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
     private final MqBase mqBase;
     private final RedissonClient redissonClient;
     private final ITextInfoService textInfoService;
-    private final TextInfo textInfo;
 
     /**
      * 获取热评列表

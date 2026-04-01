@@ -1,24 +1,20 @@
 package com.hls.media.service.impl;
 
 
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Pair;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hls.base.R;
 import com.hls.base.config.MqConfig;
 import com.hls.base.config.UserContext;
-import com.hls.base.exception.MusicException;
 import com.hls.base.utils.*;
 import com.hls.media.config.MinioConfig;
-import com.hls.media.dto.DelTempMedia;
+import com.hls.base.dto.DelTempMedia;
 import com.hls.media.mapper.MediaMapper;
 import com.hls.media.po.Media;
-import com.hls.media.po.UserMedia;
 import com.hls.media.service.IMediaService;
 import com.hls.media.service.IUserMediaService;
 import io.minio.*;
-import io.minio.errors.*;
 import io.minio.http.Method;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,13 +24,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**

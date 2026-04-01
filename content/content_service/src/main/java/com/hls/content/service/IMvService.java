@@ -17,7 +17,7 @@ import java.util.List;
  */
 public interface IMvService extends IService<Mv> {
 
-    PageResult<Mv> pageBySinger(Long id, PageParam pageParam);
+    PageResult<Mv> pageBySinger(Integer id, PageParam pageParam);
 
     /**
      * 新增MV

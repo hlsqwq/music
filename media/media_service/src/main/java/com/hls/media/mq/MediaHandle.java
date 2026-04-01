@@ -2,7 +2,7 @@ package com.hls.media.mq;
 
 import com.hls.base.config.MqConfig;
 import com.hls.base.utils.RedisBase;
-import com.hls.media.dto.DelTempMedia;
+import com.hls.base.dto.DelTempMedia;
 import io.minio.MinioClient;
 import io.minio.RemoveObjectArgs;
 import kotlin.Pair;

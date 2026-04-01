@@ -31,21 +31,18 @@ public class SingerController {
 
 
     /**
-     * 管理端
+     *
      * @param singerDto
      */
     @PostMapping("/add")
-    public void add_manage_singer(@RequestBody SingerDto singerDto) {
+    public void add_singer(@RequestBody SingerDto singerDto) {
         singerService.add_singer(singerDto);
     }
 
 
-    /**
-     * 管理端
-     * @param editSingerDto
-     */
+
     @PutMapping("/update")
-    public void update_manage_singer(EditSingerDto editSingerDto) {
+    public void update_singer(EditSingerDto editSingerDto) {
         singerService.update_singer(editSingerDto);
     }
 
@@ -56,14 +53,14 @@ public class SingerController {
      * @return
      */
     @GetMapping("/{id}")
-    public Singer get_manage_singer(@PathVariable Long id) {
+    public Singer get_singer(@PathVariable Long id) {
         return singerService.getById(id);
     }
 
 
 
     @DeleteMapping("/{id}")
-    public void delete_manage_singer(@PathVariable Integer id) {
+    public void delete_singer(@PathVariable Integer id) {
         singerService.del_singer(id);
     }
 

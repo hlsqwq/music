@@ -24,23 +24,20 @@ public class MvController {
 
     private final IMvService mvService;
 
+
     /**
-     *
+     * 分页查询歌手的mv
      * @param id 歌手id
-     * @param pageParam
+     * @param pageParam 分页参数
      * @return
      */
     @GetMapping("page/{id}")
-    public PageResult<Mv> pageBySinger(@PathVariable Long id, @RequestBody PageParam pageParam) {
+    public PageResult<Mv> pageBySinger(@PathVariable Integer id, @RequestBody PageParam pageParam) {
         return mvService.pageBySinger(id, pageParam);
     }
 
-    /**
-     * 新增MV
-     * 
-     * @param mv MV信息
-     */
-    @Access(value = "member")
+
+
     @PostMapping("/add")
     public void addMv(@RequestBody Mv mv) {
         mvService.addMv(mv);
@@ -51,7 +48,6 @@ public class MvController {
      * 
      * @param mvId MV ID
      */
-    @Access(value = "member")
     @DeleteMapping("/delete/{mvId}")
     public void deleteMv(@PathVariable Integer mvId) {
         mvService.deleteMv(mvId);
@@ -62,7 +58,6 @@ public class MvController {
      * 
      * @param mv MV信息
      */
-    @Access(value = "member")
     @PutMapping("/update")
     public void updateMv(@RequestBody Mv mv) {
         mvService.updateMv(mv);

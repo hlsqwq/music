@@ -1,4 +1,4 @@
-package com.hls.media.dto;
+package com.hls.base.dto;
 
 
 import lombok.AllArgsConstructor;

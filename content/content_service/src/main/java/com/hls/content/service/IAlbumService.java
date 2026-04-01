@@ -24,7 +24,7 @@ public interface IAlbumService extends IService<Album> {
      * @param pageParam 分页信息
      * @return 专辑
      */
-    PageResult<Album> pageBySingerId(Long id, String order, PageParam pageParam);
+    PageResult<Album> pageBySingerId(Integer id, String order, PageParam pageParam);
 
     /**
      * 添加专辑
@@ -38,7 +38,7 @@ public interface IAlbumService extends IService<Album> {
      *
      * @param albumId id
      */
-    void deleteAlbum(Long albumId);
+    void deleteAlbum(Integer albumId);
 
     /**
      * 修改专辑
@@ -53,6 +53,6 @@ public interface IAlbumService extends IService<Album> {
      * @param albumId 专辑id
      * @return 专辑详细信息，包含歌曲列表
      */
-    AlbumDetailDto getAlbumDetail(Long albumId);
+    AlbumDetailDto getAlbumDetail(Integer albumId);
 
 }

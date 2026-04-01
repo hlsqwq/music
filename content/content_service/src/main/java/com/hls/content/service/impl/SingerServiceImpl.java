@@ -4,9 +4,9 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hls.base.config.MqConfig;
 import com.hls.base.exception.MusicException;
-import com.hls.content.utils.RedisHotUtil;
-import com.hls.base.utils.WorksCateTopN;
+import com.hls.base.utils.MqBase;
 import com.hls.content.dto.EditSingerDto;
 import com.hls.content.dto.SingerDto;
 import com.hls.content.mapper.SingerMapper;
@@ -15,7 +15,9 @@ import com.hls.content.po.TextInfo;
 import com.hls.content.service.ISingerService;
 import com.hls.content.service.ISongService;
 import com.hls.content.service.ITextInfoService;
+import com.hls.content.utils.RedisHotUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,12 +38,11 @@ import java.util.Set;
 @Service
 public class SingerServiceImpl extends ServiceImpl<SingerMapper, Singer> implements ISingerService {
 
-    private final WorksCateTopN worksCateTopN;
     private final ISongService songService;
     private final ITextInfoService textInfoService;
-    private final ISingerHotService singerHotService;
-    private final mqUtils mqUtils;
     private final RedisHotUtil redisHotUtil;
+    private final MqBase mqBase;
+    private final ApplicationContext applicationContext;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -51,55 +52,29 @@ public class SingerServiceImpl extends ServiceImpl<SingerMapper, Singer> impleme
             return;
         }
         String introduction = singerDto.getIntroduction();
-        if (introduction != null && introduction.length() > 50) {
-            singerDto.setIntroduction(introduction.substring(0, 50));
+        singerDto.setIntroduction(introduction.substring(0, 50));
+        String substring = introduction.substring(50);
+        if(!substring.isBlank()){
+            TextInfo textInfo = new TextInfo();
+            textInfo.setContent(substring);
+            textInfoService.save(textInfo);
         }
         Singer singer = BeanUtil.copyProperties(singerDto, Singer.class);
-        singer.setCreateTime(LocalDateTime.now());
         save(singer);
-
-        saveText(singer.getId(), introduction);
-        SingerHot singerHot = new SingerHot();
-        singerHot.setId(singer.getId());
-        singerHotService.save(singerHot);
-        mqUtils.addMedia(singerDto.getAvatar());
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    protected void saveText(Integer id, String introduction) {
-        TextInfo textInfo = new TextInfo();
-        textInfo.setSingerId(id);
-        textInfo.setContent(introduction);
-        // todo
-        // textInfo.setUserId()
-        textInfo.setCreateTime(LocalDateTime.now());
-        textInfoService.save(textInfo);
-    }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void update_singer(EditSingerDto editSingerDto) {
-        Singer byId = getById(editSingerDto.getId());
-        if (byId.getAvatar() != null && byId.getAvatar().equals(editSingerDto.getAvatar())) {
-            mqUtils.delMedia(byId.getAvatar());
-            mqUtils.addMedia(editSingerDto.getAvatar());
-        }
-        if (editSingerDto.getIntroduction() != null &&
-                !editSingerDto.getIntroduction().equals(byId.getIntroduction())) {
-            LambdaQueryWrapper<TextInfo> qw = new LambdaQueryWrapper<TextInfo>()
-                    .eq(TextInfo::getSingerId, byId.getId());
-            textInfoService.remove(qw);
-            if (editSingerDto.getIntroduction().length() > 50) {
-                saveText(editSingerDto.getId(), editSingerDto.getIntroduction());
-            }
-        }
-        BeanUtil.copyProperties(editSingerDto, byId, CopyOptions.create().setIgnoreNullValue(true));
-        byId.setIntroduction(editSingerDto.getIntroduction().substring(0, 50));
-        updateById(byId);
+        SingerServiceImpl bean = applicationContext.getBean(SingerServiceImpl.class);
+        bean.del_singer(editSingerDto.getId());
+        bean.add_singer(editSingerDto);
     }
 
     @Override
     public List<EditSingerDto> getTop10(int id) {
+
         Set set = worksCateTopN.getTopN("category_" + id + "_singer", 10);
         ArrayList<Integer> arr = new ArrayList<>();
         for (Object o : set) {
@@ -117,11 +92,12 @@ public class SingerServiceImpl extends ServiceImpl<SingerMapper, Singer> impleme
     public void del_singer(Integer id) {
         Singer byId = getById(id);
         LambdaQueryWrapper<TextInfo> qw = new LambdaQueryWrapper<TextInfo>()
-                .eq(TextInfo::getSingerId, byId.getId());
+                .eq(TextInfo::getId, byId.getIntroductionId());
         textInfoService.remove(qw);
-        if (byId.getAvatar() != null) {
-            mqUtils.delMedia(byId.getAvatar());
-        }
+        String substring = byId.getAvatarUrl().substring(byId.getAvatarUrl().indexOf("/") + 1);
+        substring = substring.substring(substring.indexOf("/") + 1);
+        mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY,
+                new com.hls.base.dto.DelTempMedia(null,"music",substring));
         removeById(id);
     }
 

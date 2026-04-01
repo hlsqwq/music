@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hls.base.PageParam;
 import com.hls.base.PageResult;
 import com.hls.base.config.MqConfig;
+import com.hls.base.dto.DelTempMedia;
 import com.hls.base.utils.AuditState;
 import com.hls.base.utils.MqBase;
 import com.hls.content.dto.AlbumDetailDto;
@@ -36,9 +37,7 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
 
     private final ISongService songService;
     private final ISingerService singerService;
-    private final IMvService mvService;
     private final ITextInfoService textInfoService;
-    private final ISingerHotService singerHotService;
     private final MqBase mqBase;
     private final ApplicationContext applicationContext;
 
@@ -51,7 +50,7 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
      * @return 专辑
      */
     @Override
-    public PageResult<Album> pageBySingerId(Long id, String order, PageParam pageParam) {
+    public PageResult<Album> pageBySingerId(Integer id, String order, PageParam pageParam) {
         Page<Album> page = Page.of(pageParam.getNum(), pageParam.getSize());
         LambdaQueryWrapper<Album> qw = new LambdaQueryWrapper<Album>()
                 .eq(Album::getSingerId, id)
@@ -69,8 +68,6 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
     @Override
     public void addAlbum(AlbumDetailDto albumDetailDto) {
         applicationContext.getBean(AlbumServiceImpl.class).add(albumDetailDto);
-
-        // todo mq 同步 头像 media
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -78,10 +75,14 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
         Album album = BeanUtil.copyProperties(albumDetailDto, Album.class);
         if (album.getIntroduction().length() > 50) {
             String str = album.getIntroduction();
-            album.setIntroduction(str.substring(0, 25));
+            album.setIntroduction(str.substring(0, 50));
+            str=str.substring(50);
+            if(!str.isBlank()){
+                TextInfo textInfo = new TextInfo();
+                textInfo.setContent(str);
+                textInfoService.save(textInfo);
+            }
             save(album);
-            album.setIntroduction(str);
-            saveText(album);
         } else {
             save(album);
         }
@@ -91,7 +92,8 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
 
         List<Song> songs = albumDetailDto.getSongs();
         for (int i = 0; i < songs.size(); i++) {
-            if (Objects.isNull(songs.get(i)) || songs.get(i).getStatus().equals(AuditState.pass)) {
+            if (Objects.isNull(songs.get(i).getAlbumId()) ||
+                    songs.get(i).getStatus().equals(AuditState.pass)) {
                 songs.get(i).setAlbumId(album.getId());
                 songs.get(i).setAlbumName(album.getName());
                 songs.get(i).setAlbumOrder(i);
@@ -101,11 +103,14 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
     }
 
     @Override
-    public void deleteAlbum(Long albumId) {
+    public void deleteAlbum(Integer albumId) {
         Album byId = getById(albumId);
-        AlbumServiceImpl bean = applicationContext.getBean(AlbumServiceImpl.class);
-        bean.del(byId);
-        mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY, byId.getAvatar());
+        applicationContext.getBean(AlbumServiceImpl.class).del(byId);
+        //        http://192.168.124.8:9000/music/a3.png
+        String substring = byId.getAvatarUrl().substring(byId.getAvatarUrl().indexOf("/") + 1);
+        substring = substring.substring(substring.indexOf("/") + 1);
+        mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY,
+                new DelTempMedia(null,"music",substring));
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -114,50 +119,25 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
             return;
         }
         LambdaQueryWrapper<Song> eq = new LambdaQueryWrapper<Song>()
-                .eq(Song::getAlbum, byId.getName())
+                .eq(Song::getAlbumId, byId.getId())
                 .eq(Song::getStatus, AuditState.pass);
         List<Song> list = songService.list(eq);
         if (list != null && !list.isEmpty()) {
-            Long playNum = 0L;
-            Long likeNum = 0L;
-            Long mvNum = 0L;
             for (Song song : list) {
-                song.setAlbum(null);
-                playNum = song.getPlayNum();
-                likeNum = song.getLikeNum();
-                Mv byId1 = mvService.getById(song.getId());
-                if (byId1 != null) {
-                    mvNum++;
-                    playNum += byId1.getPlayNum();
-                    likeNum += byId1.getLikeNum();
-                }
+                song.setAlbumId(null);
+                song.setAlbumOrder(null);
+                song.setAlbumName(null);
             }
             songService.updateBatchById(list);
             Singer byId1 = singerService.getById(byId.getSingerId());
             byId1.setAlbumNum(byId1.getAlbumNum() - 1);
-            byId1.setMvNum((int) (byId1.getMvNum() - mvNum));
-            byId1.setSongNum((byId1.getSongNum() - list.size()));
             singerService.updateById(byId1);
-            SingerHot byId2 = singerHotService.getById(byId.getSingerId());
-            singerHotService.refreshHot(byId.getSingerId(),
-                    byId2.getLikeNum() - likeNum,
-                    byId2.getPlayNum() - playNum);
         }
-        LambdaQueryWrapper<TextInfo> eq1 = new LambdaQueryWrapper<TextInfo>()
-                .eq(TextInfo::getAlbumId, byId.getId());
-        textInfoService.remove(eq1);
-        removeById(byId.getId());
+        if(byId.getIntroductionId()!=null){
+            textInfoService.removeById(byId.getIntroductionId());
+        }
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    public void saveText(Album album) {
-        TextInfo textInfo = new TextInfo();
-        textInfo.setAlbumId(album.getId());
-        textInfo.setUserId(album.getUserId());
-        textInfo.setContent(album.getIntroduction());
-        textInfo.setCreateTime(LocalDateTime.now());
-        textInfoService.save(textInfo);
-    }
 
     @Override
     public void updateAlbum(AlbumDetailDto albumDetailDto) {
@@ -166,22 +146,18 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
             return;
         }
         AlbumServiceImpl bean = applicationContext.getBean(AlbumServiceImpl.class);
-        if (!byId.getAvatar().equals(albumDetailDto.getAvatar())) {
-            mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY, byId.getAvatar());
-            // 这里可以添加添加媒体的逻辑，根据实际需求实现
-        }
-        bean.del(byId);
-        bean.add(albumDetailDto);
+        bean.deleteAlbum(albumDetailDto.getId());
+        bean.addAlbum(albumDetailDto);
     }
 
     @Override
-    public AlbumDetailDto getAlbumDetail(Long albumId) {
+    public AlbumDetailDto getAlbumDetail(Integer albumId) {
         Album album = getById(albumId);
         if (album == null) {
             return null;
         }
         LambdaQueryWrapper<Song> eq = new LambdaQueryWrapper<Song>()
-                .eq(Song::getAlbum, album.getName())
+                .eq(Song::getAlbumId, album.getId())
                 .eq(Song::getStatus, AuditState.pass);
         List<Song> list = songService.list(eq);
         AlbumDetailDto albumDetailDto = BeanUtil.copyProperties(album, AlbumDetailDto.class);

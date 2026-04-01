@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hls.base.PageParam;
 import com.hls.base.PageResult;
 import com.hls.base.config.UserContext;
+import com.hls.base.dto.DelTempMedia;
 import com.hls.base.utils.RedisBase;
 import com.hls.content.utils.RedisHotUtil;
 import com.hls.content.po.Mv;
@@ -18,6 +19,7 @@ import com.hls.base.utils.AuditState;
 import com.hls.base.config.MqConfig;
 import com.hls.base.utils.MqBase;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,19 +44,20 @@ public class MvServiceImpl extends ServiceImpl<MvMapper, Mv> implements IMvServi
     private final RedisBase redisBase;
     private final DefaultRedisScript<Long> incrOrDecrLike;
     private final MqBase mqBase;
+    private final ApplicationContext applicationContext;
 
     @Override
-    public PageResult<Mv> pageBySinger(Long id, PageParam pageParam) {
+    public PageResult<Mv> pageBySinger(Integer id, PageParam pageParam) {
         Page<Mv> page = Page.of(pageParam.getNum(), pageParam.getSize());
         LambdaQueryWrapper<Mv> qw = new LambdaQueryWrapper<Mv>()
                 .eq(Mv::getSingerId, id)
                 .eq(Mv::getStatus, AuditState.pass)
-                .orderByDesc(Mv::getPlayNum);
+                .orderByDesc(Mv::getHot);
         Page<Mv> res = page(page, qw);
 
         PageResult<Mv> albumPageResult = new PageResult<>();
-        albumPageResult.setNum(res.getCurrent());
-        albumPageResult.setSize(res.getSize());
+        albumPageResult.setNum(pageParam.getNum());
+        albumPageResult.setSize(pageParam.getSize());
         albumPageResult.setTotal(res.getTotal());
         albumPageResult.setItem(res.getRecords());
         return albumPageResult;
@@ -69,70 +72,37 @@ public class MvServiceImpl extends ServiceImpl<MvMapper, Mv> implements IMvServi
             singer.setMvNum(singer.getMvNum() + 1);
             singerMapper.updateById(singer);
         }
-        // 这里可以添加添加媒体的逻辑，根据实际需求实现
-        // mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY, mv.getAvatar());
-        // mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY, mv.getVideo());
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void deleteMv(Integer mvId) {
         Mv mv = getById(mvId);
-        if (mv != null) {
-            if (mv.getAvatar() != null) {
-                mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY, mv.getAvatar());
-            }
-            if (mv.getVideo() != null) {
-                mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY, mv.getVideo());
-            }
-            removeById(mvId);
-
-            Singer singer = singerMapper.selectById(mv.getSingerId());
-            if (singer != null && singer.getMvNum() > 0) {
-                singer.setMvNum(singer.getMvNum() - 1);
-                singer.setPlayNum(singer.getPlayNum() - mv.getPlayNum());
-                singer.setLikeNum(singer.getLikeNum() - mv.getLikeNum());
-                singerMapper.updateById(singer);
-                // 这里可以添加更新歌手热度的逻辑，根据实际需求实现
-                // mqBase.sendMessageToMusic(MqConfig.HOT_SINGER_KEY, singer.getId());
-            }
+        if (mv == null) {
+            return;
+        }
+        String substring = mv.getAvatarUrl().substring(mv.getAvatarUrl().indexOf("/") + 1);
+        substring = substring.substring(substring.indexOf("/") + 1);
+        mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY,
+                new DelTempMedia(null, "music", substring));
+        substring = mv.getVideo().substring(mv.getVideo().indexOf("/") + 1);
+        substring = substring.substring(substring.indexOf("/") + 1);
+        mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY,
+                new DelTempMedia(null, "music", substring));
+        removeById(mvId);
+        Singer singer = singerMapper.selectById(mv.getSingerId());
+        if (singer != null && singer.getMvNum() > 0) {
+            singer.setMvNum(singer.getMvNum() - 1);
+            singerMapper.updateById(singer);
         }
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void updateMv(Mv mv) {
-        Mv byId = getById(mv.getId());
-
-        if (byId.getAvatar() != null && !byId.getAvatar().equals(mv.getAvatar())) {
-            mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY, byId.getAvatar());
-        }
-        if (byId.getVideo() != null && !byId.getVideo().equals(mv.getVideo())) {
-            mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY, byId.getVideo());
-        }
-
-        updateById(mv);
-
-        if (mv.getAvatar() != null && !mv.getAvatar().equals(byId.getAvatar())) {
-            // 这里可以添加添加媒体的逻辑，根据实际需求实现
-            // mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY, mv.getAvatar());
-        }
-        if (mv.getVideo() != null && !mv.getVideo().equals(byId.getVideo())) {
-            // 这里可以添加添加媒体的逻辑，根据实际需求实现
-            // mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY, mv.getVideo());
-        }
-
-        Singer byId1 = singerService.getById(mv.getSingerId());
-        if (byId1 == null) {
-            return;
-        }
-        Long likeNum = mv.getLikeNum() - byId1.getLikeNum();
-        Long playNum = mv.getPlayNum() - byId1.getPlayNum();
-        byId1.setLikeNum(byId1.getLikeNum() + likeNum);
-        byId1.setPlayNum(byId1.getPlayNum() + playNum);
-        singerService.updateById(byId1);
-        // 这里可以添加更新歌手热度的逻辑，根据实际需求实现
-        // mqBase.sendMessageToMusic(MqConfig.HOT_SINGER_KEY, byId1.getId());
+        MvServiceImpl bean = applicationContext.getBean(MvServiceImpl.class);
+        bean.deleteMv(mv.getId());
+        bean.addMv(mv);
     }
 
     @Override
