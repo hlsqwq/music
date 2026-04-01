@@ -79,6 +79,29 @@ public class SingerController {
     }
 
 
+    /**
+     * 获取歌手的粉丝数
+     * @param singerId 歌手id
+     * @return long
+     */
+    @GetMapping("/fans/{singerId}")
+    public R<Object> getFans(@PathVariable Integer singerId) {
+        return singerService.getFans(singerId);
+    }
+
+
+    /**
+     * 增加歌手的粉丝
+     *
+     * @param singerId 歌手id
+     * @return 更新后的粉丝数 long
+     */
+    @PostMapping("/follow/{singerId}")
+    public R<Object> follow(@PathVariable Integer singerId) {
+        return singerService.follow(singerId);
+    }
+
+
 
 
 }

@@ -19,11 +19,15 @@ import com.hls.content.service.ISongService;
 import com.hls.content.service.ITextInfoService;
 import com.hls.content.utils.RedisHotUtil;
 import lombok.RequiredArgsConstructor;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 
 /**
  * <p>
@@ -42,8 +46,9 @@ public class SingerServiceImpl extends ServiceImpl<SingerMapper, Singer> impleme
     private final RedisHotUtil redisHotUtil;
     private final MqBase mqBase;
     private final ApplicationContext applicationContext;
-    private final RedisKeys  redisKeys;
-    private final RedisBase  redisBase;
+    private final RedisKeys redisKeys;
+    private final RedisBase redisBase;
+    private final RedissonClient redissonClient;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -55,7 +60,7 @@ public class SingerServiceImpl extends ServiceImpl<SingerMapper, Singer> impleme
         String introduction = singerDto.getIntroduction();
         singerDto.setIntroduction(introduction.substring(0, 50));
         String substring = introduction.substring(50);
-        if(!substring.isBlank()){
+        if (!substring.isBlank()) {
             TextInfo textInfo = new TextInfo();
             textInfo.setContent(substring);
             textInfoService.save(textInfo);
@@ -86,9 +91,8 @@ public class SingerServiceImpl extends ServiceImpl<SingerMapper, Singer> impleme
                 .map(String::valueOf)
                 .map(Integer::parseInt)
                 .toList();
-        if(ids.isEmpty()){
-            //todo 重新计算
-            return R.failure("等待重试");
+        if (ids.isEmpty()) {
+            return R.failure("等待下次更新");
         }
         return R.success(listByIds(ids));
     }
@@ -103,13 +107,58 @@ public class SingerServiceImpl extends ServiceImpl<SingerMapper, Singer> impleme
         String substring = byId.getAvatarUrl().substring(byId.getAvatarUrl().indexOf("/") + 1);
         substring = substring.substring(substring.indexOf("/") + 1);
         mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY,
-                new com.hls.base.dto.DelTempMedia(null,"music",substring));
+                new com.hls.base.dto.DelTempMedia(null, "music", substring));
         removeById(id);
     }
 
+    /**
+     * 获取歌手的粉丝数
+     *
+     * @param singerId 歌手id
+     * @return long
+     */
+    @Override
+    public R<Object> getFans(Integer singerId) {
+        String key = redisKeys.getSingerFans(singerId);
+        Long num = redisBase.get(key, Long.class);
+        if (num != null) {
+            return R.success(num);
+        }
+        String lock = redisBase.getKey("lock", "fans", singerId);
+        RLock lock1 = redissonClient.getLock(lock);
+        try {
+            if (lock1.tryLock(1, TimeUnit.SECONDS)) {
+                Singer byId = getById(singerId);
+                redisBase.set(key, byId.getFansNum());
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        num = redisBase.get(key, Long.class);
+        if (num == null) {
+            return R.failure("请稍后");
+        }
+        return R.success(num);
+    }
 
-
-
+    /**
+     * 增加歌手的粉丝
+     *
+     * @param singerId 歌手id
+     * @return 更新后的粉丝数 long
+     */
+    @Override
+    public R<Object> follow(Integer singerId) {
+        String key = redisKeys.getSingerFans(singerId);
+        Long increment = redisBase.increment(key);
+        if (increment == 1) {
+            Singer byId = getById(singerId);
+            long n = byId.getFansNum() + redisBase.get(key, Long.class);
+            redisBase.set(key, n);
+            return R.success(n);
+        }
+        return R.success(increment);
+    }
 
 
 }

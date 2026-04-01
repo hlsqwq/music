@@ -45,6 +45,15 @@ public class RedisKeys {
 
 
     /**
+     * 获取歌手粉丝id
+     * @param singerId 歌手id
+     * @return
+     */
+    public String getSingerFans(Integer singerId){
+        return redisBase.getKey(DoType.fans.getDoName(), TableType.singer.getTableName(), singerId);
+    }
+
+    /**
      * 获取歌手的排行榜信息
      * @param id 分类id
      * @return

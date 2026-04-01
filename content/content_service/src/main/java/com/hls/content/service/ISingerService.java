@@ -3,11 +3,8 @@ package com.hls.content.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hls.base.R;
 import com.hls.content.dto.EditSingerDto;
-import com.hls.content.dto.SingerDetailDto;
 import com.hls.content.dto.SingerDto;
 import com.hls.content.po.Singer;
-
-import java.util.List;
 
 /**
  * <p>
@@ -32,4 +29,19 @@ public interface ISingerService extends IService<Singer> {
     R<Object> getTop10(int id);
 
     void del_singer(Integer id);
+
+    /**
+     * 获取歌手的粉丝数
+     * @param singerId 歌手id
+     * @return long
+     */
+    R<Object> getFans(Integer singerId);
+
+    /**
+     * 增加歌手的粉丝
+     *
+     * @param singerId 歌手id
+     * @return 更新后的粉丝数 long
+     */
+    R<Object> follow(Integer singerId);
 }
