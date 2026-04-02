@@ -110,7 +110,7 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
         String substring = byId.getAvatarUrl().substring(byId.getAvatarUrl().indexOf("/") + 1);
         substring = substring.substring(substring.indexOf("/") + 1);
         mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY,
-                new DelTempMedia(null,"music",substring));
+                new DelTempMedia(byId.getAvatarId(),null,"music",substring));
     }
 
     @Transactional(rollbackFor = Exception.class)

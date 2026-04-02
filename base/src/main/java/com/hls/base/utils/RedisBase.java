@@ -21,9 +21,9 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-@Component
 @Slf4j
 @RequiredArgsConstructor
+@Component
 public class RedisBase {
 
     @Getter

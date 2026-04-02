@@ -1,8 +1,11 @@
 package com.hls.content.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hls.base.PageParam;
+import com.hls.base.R;
 import com.hls.content.dto.SongListDto;
 import com.hls.content.po.SongList;
+
 import java.util.List;
 
 /**
@@ -17,27 +20,34 @@ public interface ISongListService extends IService<SongList> {
 
     /**
      * 新增歌单
+     *
      * @param songList 歌单信息
+     * @return
      */
-    void addSongList(SongList songList);
+    R<Object> addSongList(SongList songList);
 
     /**
      * 删除歌单
+     *
      * @param songListId 歌单ID
+     * @return
      */
-    void deleteSongList(Integer songListId);
+    R<Object> deleteSongList(Integer songListId);
 
     /**
      * 更新歌单
+     *
      * @param songList 歌单信息
+     * @return
      */
-    void updateSongList(SongList songList);
+    R<Object> updateSongList(SongList songList);
 
     /**
      * 获取歌单详情
+     *
      * @param songListId 歌单ID
      * @return 歌单详情
      */
-    SongListDto getSongListDetail(Integer songListId);
+    R<SongListDto> getSongListDetail(Integer songListId);
 
 }

@@ -56,6 +56,9 @@ public class SingerServiceImpl extends ServiceImpl<SingerMapper, Singer> impleme
             MusicException.cast("对象不可为空");
             return;
         }
+
+        Singer singer = BeanUtil.copyProperties(singerDto, Singer.class);
+
         String introduction = singerDto.getIntroduction();
         singerDto.setIntroduction(introduction.substring(0, 50));
         String substring = introduction.substring(50);
@@ -63,8 +66,9 @@ public class SingerServiceImpl extends ServiceImpl<SingerMapper, Singer> impleme
             TextInfo textInfo = new TextInfo();
             textInfo.setContent(substring);
             textInfoService.save(textInfo);
+            singer.setIntroduction(introduction.substring(0, 50));
+            singer.setIntroductionId(textInfo.getId());
         }
-        Singer singer = BeanUtil.copyProperties(singerDto, Singer.class);
         save(singer);
     }
 

@@ -1,11 +1,12 @@
 package com.hls.content.controller;
 
-
+import com.hls.base.PageParam;
+import com.hls.base.R;
 import com.hls.content.config.Access;
 import com.hls.content.dto.SongListDto;
 import com.hls.content.po.SongList;
 import com.hls.content.service.ISongListService;
-import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,42 +19,45 @@ import java.util.List;
  * @author hls
  * @since 2026-01-17
  */
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/song-list")
 public class SongListController {
 
-
-    @Resource
-    private ISongListService songListService;
+    private final ISongListService songListService;
 
     /**
      * 添加歌单
      *
      * @param songList 歌单信息
+     * @return 是否成功
      */
     @PostMapping("/add")
-    public void addSongList(@RequestBody SongList songList) {
-        songListService.addSongList(songList);
+    public R<Object> addSongList(@RequestBody SongList songList) {
+        return songListService.addSongList(songList);
     }
 
     /**
      * 删除歌单
      *
      * @param songListId 歌单ID
+     * @return 是否成功
      */
     @DeleteMapping("/delete/{songListId}")
-    public void deleteSongList(@PathVariable Integer songListId) {
-        songListService.deleteSongList(songListId);
+    public R<Object> deleteSongList(@PathVariable Integer songListId) {
+        return songListService.deleteSongList(songListId);
     }
 
     /**
      * 更新歌单
      *
      * @param songList 歌单信息
+     * @return 是否成功
      */
     @PutMapping("/update")
-    public void updateSongList(@RequestBody SongList songList) {
-        songListService.updateSongList(songList);
+    public R<Object> updateSongList(@RequestBody SongList songList) {
+        return songListService.updateSongList(songList);
+
     }
 
     /**
@@ -63,8 +67,18 @@ public class SongListController {
      * @return 歌单详情
      */
     @GetMapping("/detail/{songListId}")
-    public SongListDto getSongListDetail(@PathVariable Integer songListId) {
+    public R<SongListDto> getSongListDetail(@PathVariable Integer songListId) {
         return songListService.getSongListDetail(songListId);
+    }
+
+    /**
+     * 分页查询歌单
+     *
+     * @return 歌单列表
+     */
+    @GetMapping("/list")
+    public R<List<SongList>> getSongList(@RequestBody PageParam pageParam) {
+        return R.success(songListService.list());
     }
 
 }

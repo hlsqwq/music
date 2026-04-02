@@ -18,6 +18,19 @@ public class MqBase {
 
     private final RabbitTemplate rabbitTemplate;
 
+
+    /**
+     * 其他服务删除媒资文件
+     * @param mediaId 媒资id
+     * @param mediaUrl 媒资url
+     */
+    public void sendMessageDelMedia(Integer mediaId, String mediaUrl) {
+        String substring = mediaUrl.substring(mediaUrl.indexOf("/") + 1);
+        substring = substring.substring(substring.indexOf("/") + 1);
+        sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY,
+                new com.hls.base.dto.DelTempMedia(mediaId, null, "music", substring));
+    }
+
     public void sendMessage(String exchange, String routingKey, Object message, MusicCd cd) {
         rabbitTemplate.convertAndSend(exchange, routingKey, message, cd);
     }
@@ -34,7 +47,7 @@ public class MqBase {
 
     /**
      *
-     * @param message  第一个参数是 MusicCd    第二个 cause
+     * @param message 第一个参数是 MusicCd    第二个 cause
      */
     public void sendMessageToDead(Object... message) {
         sendMessage(MqConfig.DEAD_EXCHANGE, MqConfig.DEAD_KEY, message);
@@ -66,8 +79,9 @@ public class MqBase {
 
     /**
      * 发送消息延迟一秒
+     *
      * @param routingKey 队列 key
-     * @param message 消息
+     * @param message    消息
      */
     public void sendDelayMessageToMusic(String routingKey, Object message) {
         sendDelayMessage(MqConfig.EXCHANGE, routingKey, message, 1000);
@@ -75,11 +89,12 @@ public class MqBase {
 
     /**
      * 发送消息延迟一小时
+     *
      * @param routingKey 队列 key
-     * @param message 消息
+     * @param message    消息
      */
     public void sendDelayHourMessageToMusic(String routingKey, Object message) {
-        sendDelayMessage(MqConfig.EXCHANGE, routingKey, message, 1000*60*60);
+        sendDelayMessage(MqConfig.EXCHANGE, routingKey, message, 1000 * 60 * 60);
     }
 
 }
