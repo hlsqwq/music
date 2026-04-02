@@ -3,6 +3,7 @@ package com.hls.content.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hls.base.PageParam;
 import com.hls.base.R;
 import com.hls.base.config.MqConfig;
 import com.hls.base.exception.MusicException;
@@ -105,7 +106,7 @@ public class SingerServiceImpl extends ServiceImpl<SingerMapper, Singer> impleme
         String substring = byId.getAvatarUrl().substring(byId.getAvatarUrl().indexOf("/") + 1);
         substring = substring.substring(substring.indexOf("/") + 1);
         mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY,
-                new com.hls.base.dto.DelTempMedia(null, "music", substring));
+                new com.hls.base.dto.DelTempMedia(byId.getAvatarId(),null, "music", substring));
         removeById(id);
     }
 

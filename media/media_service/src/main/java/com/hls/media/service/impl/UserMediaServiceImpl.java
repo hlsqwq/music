@@ -80,9 +80,16 @@ public class UserMediaServiceImpl extends ServiceImpl<UserMediaMapper, UserMedia
             Media byId1 = MediaService.getById(byId.getMediaId());
             MediaService.removeById(byId.getMediaId());
             mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY,
-                    new DelTempMedia(null, minioConfig.music, byId1.getPath()));
+                    new DelTempMedia(null,null, minioConfig.music, byId1.getPath()));
         }
         return R.success();
+    }
+
+    @Override
+    public Integer ref(Integer mediaId) {
+        LambdaQueryWrapper<UserMedia> eq = new LambdaQueryWrapper<UserMedia>()
+                .eq(UserMedia::getMediaId, mediaId);
+        return list(eq).size();
     }
 
 

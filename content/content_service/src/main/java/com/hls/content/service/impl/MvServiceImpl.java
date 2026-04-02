@@ -84,11 +84,11 @@ public class MvServiceImpl extends ServiceImpl<MvMapper, Mv> implements IMvServi
         String substring = mv.getAvatarUrl().substring(mv.getAvatarUrl().indexOf("/") + 1);
         substring = substring.substring(substring.indexOf("/") + 1);
         mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY,
-                new DelTempMedia(null, "music", substring));
+                new DelTempMedia(mv.getAvatarId(),null, "music", substring));
         substring = mv.getVideo().substring(mv.getVideo().indexOf("/") + 1);
         substring = substring.substring(substring.indexOf("/") + 1);
         mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY,
-                new DelTempMedia(null, "music", substring));
+                new DelTempMedia(mv.getVideoId(),null, "music", substring));
         removeById(mvId);
         Singer singer = singerMapper.selectById(mv.getSingerId());
         if (singer != null && singer.getMvNum() > 0) {

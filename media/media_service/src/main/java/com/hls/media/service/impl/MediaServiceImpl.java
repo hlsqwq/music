@@ -255,7 +255,7 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
 
             // 投递延迟清理消息：如果 1 小时后还是 "ING"，说明上传失败，删掉 Redis 状态
             mqBase.sendDelayHourMessageToMusic(MqConfig.MEDIA_TEMP_KEY,
-                    new DelTempMedia(key, minioConfig.music, getFilePath(fileMd5, fileName)));
+                    new DelTempMedia(null,key, minioConfig.music, getFilePath(fileMd5, fileName)));
 
             return signature;
         } else {
@@ -354,7 +354,7 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
 
             // 投递延迟清理消息：如果 1 小时后还是 "ING"，说明上传失败，删掉 Redis 状态
             mqBase.sendDelayHourMessageToMusic(MqConfig.MEDIA_TEMP_KEY,
-                    new DelTempMedia(key, minioConfig.music, getChunkPath(id, fileMd5)));
+                    new DelTempMedia(null,key, minioConfig.music, getChunkPath(id, fileMd5)));
 
             return signature;
         } else {

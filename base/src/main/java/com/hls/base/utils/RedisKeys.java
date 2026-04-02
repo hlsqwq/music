@@ -45,6 +45,15 @@ public class RedisKeys {
 
 
     /**
+     * 获取歌曲播放量
+     * @param songId 歌曲id
+     * @return
+     */
+    public String getSongPlay(Integer songId){
+        return redisBase.getKey(DoType.play.getDoName(), TableType.song.getTableName(), songId);
+    }
+
+    /**
      * 获取歌手粉丝id
      * @param singerId 歌手id
      * @return
@@ -67,7 +76,15 @@ public class RedisKeys {
     }
 
     public String getSongTop(){
-        return redisBase.getKey(DoType.singerTop.getDoName(), TableType.singer.getTableName());
+        return redisBase.getKey(DoType.singerTop.getDoName(), TableType.song.getTableName());
+    }
+
+    /**
+     * 获取歌曲热度排行榜
+     * @return 歌曲热度排行榜键
+     */
+    public String getSongHot(){
+        return redisBase.getKey(DoType.singerTop.getDoName(), TableType.song.getTableName());
     }
 
     /**

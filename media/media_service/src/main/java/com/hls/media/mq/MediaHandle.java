@@ -3,6 +3,7 @@ package com.hls.media.mq;
 import com.hls.base.config.MqConfig;
 import com.hls.base.utils.RedisBase;
 import com.hls.base.dto.DelTempMedia;
+import com.hls.media.service.IUserMediaService;
 import io.minio.MinioClient;
 import io.minio.RemoveObjectArgs;
 import kotlin.Pair;
@@ -23,12 +24,20 @@ public class MediaHandle {
 
     private final MinioClient minioClient;
     private final RedisBase redisBase;
+    private final IUserMediaService userMediaService;
 
     @RabbitListener(bindings = @QueueBinding(value = @Queue(name = MqConfig.MEDIA_TEMP_QUEUE),
             exchange = @Exchange(name = MqConfig.EXCHANGE_DELAY, type = ExchangeTypes.DIRECT, delayed = "true"),
             key = {MqConfig.MEDIA_TEMP_KEY}))
     public void delTempMedia(DelTempMedia delTempMedia) {
         if (!redisBase.get(delTempMedia.getKey(), Pair.class).getSecond().equals("ok")) {
+            if(delTempMedia.getMediaId()!=null){
+                Integer ref = userMediaService.ref(delTempMedia.getMediaId());
+                if(ref>1){
+                    return;
+                }
+            }
+
             try {
                 minioClient.removeObject(RemoveObjectArgs.builder()
                         .bucket(delTempMedia.getBucketName())

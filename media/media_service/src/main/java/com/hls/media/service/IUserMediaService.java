@@ -22,4 +22,8 @@ public interface IUserMediaService extends IService<UserMedia> {
     void saveToDb(Integer mediaId);
 
     R<Object> del(Integer id);
+
+    Integer ref(Integer mediaId);
+
+
 }

@@ -31,7 +31,6 @@ public class SongListController {
      *
      * @param songList 歌单信息
      */
-    @Access(value = "member")
     @PostMapping("/add")
     public void addSongList(@RequestBody SongList songList) {
         songListService.addSongList(songList);
@@ -42,7 +41,6 @@ public class SongListController {
      *
      * @param songListId 歌单ID
      */
-    @Access(value = "member")
     @DeleteMapping("/delete/{songListId}")
     public void deleteSongList(@PathVariable Integer songListId) {
         songListService.deleteSongList(songListId);
@@ -53,7 +51,6 @@ public class SongListController {
      *
      * @param songList 歌单信息
      */
-    @Access(value = "member")
     @PutMapping("/update")
     public void updateSongList(@RequestBody SongList songList) {
         songListService.updateSongList(songList);
