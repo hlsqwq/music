@@ -14,7 +14,7 @@ import com.hls.content.po.TextInfo;
 import com.hls.content.service.ITextInfoService;
 import com.hls.content.utils.RedisHotUtil;
 import com.hls.content.mapper.SongMapper;
-import com.hls.content.po.Song;
+import com.hls.base.po.Song;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hls.content.service.ISongService;
 import com.hls.base.utils.AuditState;

@@ -1,7 +1,7 @@
 package com.hls.content.dto;
 
-import com.hls.content.po.Song;
-import com.hls.content.po.SongList;
+import com.hls.base.po.Song;
+import com.hls.base.po.SongList;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

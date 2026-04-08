@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.hls.base.R;
 import com.hls.content.dto.EditSingerDto;
 import com.hls.content.dto.SingerDto;
-import com.hls.content.po.Singer;
+import com.hls.base.po.Singer;
 
 /**
  * <p>

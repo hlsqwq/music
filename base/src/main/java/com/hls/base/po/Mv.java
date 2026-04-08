@@ -1,4 +1,4 @@
-package com.hls.content.po;
+package com.hls.base.po;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -11,7 +11,7 @@ import lombok.experimental.Accessors;
 
 /**
  * <p>
- * 歌单信息表
+ * 歌手mv
  * </p>
  *
  * @author hls
@@ -20,46 +20,76 @@ import lombok.experimental.Accessors;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("song_list")
-public class SongList implements Serializable {
+@TableName("mv")
+public class Mv implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     /**
-     * 歌单ID（主键）
+     * id
      */
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
     /**
-     * 歌单名称
+     * mv名称
      */
     private String name;
 
     /**
-     * 创建用户ID
+     * 媒资id
      */
-    private Integer userId;
+    private Integer videoId;
 
     /**
-     * 头像id
+     * 视频源
+     */
+    private String video;
+
+    /**
+     * 歌曲id
+     */
+    private Integer songId;
+
+    /**
+     * 歌手id
+     */
+    private Integer singerId;
+
+    /**
+     * 歌手名称
+     */
+    private String singerName;
+
+    /**
+     * 封面id
      */
     private Integer avatarId;
 
     /**
-     * 歌单封面URL
+     * 封面
      */
     private String avatarUrl;
 
     /**
-     * 播放数
+     * 分类id
+     */
+    private Integer categoryId;
+
+    /**
+     * 审核状态
+     */
+    private String status;
+
+    /**
+     * 播放量
      */
     private Long playNum;
 
     /**
-     * 收藏数
+     * 点赞数
      */
-    private Long favoriteNum;
+    private Long likeNum;
 
     /**
      * 评论数
@@ -67,23 +97,15 @@ public class SongList implements Serializable {
     private Long commentNum;
 
     /**
+     * 收藏数
+     */
+    private Long favoriteNum;
+
+    /**
      * 热度
      */
     private Long hot;
 
-    /**
-     * 长文本id
-     */
-    private Integer introductionId;
-
-    /**
-     * 歌单简介
-     */
-    private String introduction;
-
-    /**
-     * 创建时间
-     */
     private LocalDateTime createTime;
 
 

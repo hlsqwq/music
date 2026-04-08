@@ -3,7 +3,6 @@ package com.hls.content.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.hls.base.PageParam;
 import com.hls.base.R;
 import com.hls.base.config.MqConfig;
 import com.hls.base.exception.MusicException;
@@ -13,12 +12,10 @@ import com.hls.base.utils.RedisKeys;
 import com.hls.content.dto.EditSingerDto;
 import com.hls.content.dto.SingerDto;
 import com.hls.content.mapper.SingerMapper;
-import com.hls.content.po.Singer;
+import com.hls.base.po.Singer;
 import com.hls.content.po.TextInfo;
 import com.hls.content.service.ISingerService;
-import com.hls.content.service.ISongService;
 import com.hls.content.service.ITextInfoService;
-import com.hls.content.utils.RedisHotUtil;
 import lombok.RequiredArgsConstructor;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -28,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
 
 /**
  * <p>

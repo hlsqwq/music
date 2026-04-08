@@ -6,7 +6,7 @@ import com.hls.base.PageResult;
 import com.hls.base.R;
 import com.hls.content.dto.HotDataDto;
 import com.hls.content.dto.SongDto;
-import com.hls.content.po.Song;
+import com.hls.base.po.Song;
 
 import java.util.List;
 

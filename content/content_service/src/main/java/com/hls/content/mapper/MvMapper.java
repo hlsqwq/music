@@ -1,6 +1,6 @@
 package com.hls.content.mapper;
 
-import com.hls.content.po.Mv;
+import com.hls.base.po.Mv;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**

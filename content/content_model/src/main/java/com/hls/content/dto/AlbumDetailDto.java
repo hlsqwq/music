@@ -1,15 +1,9 @@
 package com.hls.content.dto;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.hls.content.po.Album;
-import com.hls.content.po.Song;
+import com.hls.base.po.Album;
+import com.hls.base.po.Song;
 import lombok.*;
-import lombok.experimental.Accessors;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**

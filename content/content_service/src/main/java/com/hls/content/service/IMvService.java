@@ -2,7 +2,7 @@ package com.hls.content.service;
 
 import com.hls.base.PageParam;
 import com.hls.base.PageResult;
-import com.hls.content.po.Mv;
+import com.hls.base.po.Mv;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;

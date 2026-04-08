@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.hls.base.PageParam;
 import com.hls.base.PageResult;
 import com.hls.content.dto.AlbumDetailDto;
-import com.hls.content.po.Album;
+import com.hls.base.po.Album;
 
 /**
  * <p>

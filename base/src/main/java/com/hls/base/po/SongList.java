@@ -1,74 +1,70 @@
-package com.hls.content.po;
+package com.hls.base.po;
 
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import java.time.LocalDateTime;
+import java.io.Serializable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
-
 /**
  * <p>
- * 歌手信息表
+ * 歌单信息表
  * </p>
  *
  * @author hls
- * @since 2026-03-28
+ * @since 2026-03-27
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("singer")
-public class Singer implements Serializable {
+@TableName("song_list")
+public class SongList implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     /**
-     * 歌手ID（主键）
+     * 歌单ID（主键）
      */
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
     /**
-     * 歌手姓名
+     * 歌单名称
      */
     private String name;
 
     /**
-     * 分类
+     * 创建用户ID
      */
-    private Integer categoryId;
+    private Integer userId;
 
+    /**
+     * 头像id
+     */
     private Integer avatarId;
 
     /**
-     * 封面
+     * 歌单封面URL
      */
     private String avatarUrl;
 
     /**
-     * 发布歌曲数量
+     * 播放数
      */
-    private Integer songNum;
+    private Long playNum;
 
     /**
-     * 发布专辑数量
+     * 收藏数
      */
-    private Integer albumNum;
+    private Long favoriteNum;
 
     /**
-     * 发布MV数量
+     * 评论数
      */
-    private Integer mvNum;
-
-    /**
-     * 粉丝数
-     */
-    private Long fansNum;
+    private Long commentNum;
 
     /**
      * 热度
@@ -76,12 +72,12 @@ public class Singer implements Serializable {
     private Long hot;
 
     /**
-     * 长简介id
+     * 长文本id
      */
     private Integer introductionId;
 
     /**
-     * 歌手简介
+     * 歌单简介
      */
     private String introduction;
 

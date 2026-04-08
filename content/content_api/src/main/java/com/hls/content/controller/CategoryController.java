@@ -23,7 +23,7 @@ public class CategoryController {
 
     private final ICategoryService categoryService;
 
-    @GetMapping("list")
+    @GetMapping("/list")
     public List<CategoryTreeDto> getAllCategory() {
         return categoryService.getAllCategory();
     }
@@ -34,7 +34,7 @@ public class CategoryController {
      * @param content
      */
     @Access(value = "member")
-    @PostMapping("add")
+    @PostMapping("/add")
     public void addCategory(Long id, String content) {
         Long userId = 1L;
         categoryService.addCategory(userId, id, content);
@@ -46,14 +46,14 @@ public class CategoryController {
      * @param content
      */
     @Access(value = "member")
-    @PutMapping("update")
+    @PutMapping("/update")
     public void updateCategory(Long id, String content) {
         Long userId = 1L;
         categoryService.updateCategory(userId, id, content);
     }
 
     @Access(value = "member")
-    @DeleteMapping("delete")
+    @DeleteMapping("/delete")
     public void deleteCategory(Long id) {
         Long userId = 1L;
         categoryService.deleteCategory(userId, id);

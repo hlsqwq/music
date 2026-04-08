@@ -8,6 +8,9 @@ import com.hls.base.PageParam;
 import com.hls.base.PageResult;
 import com.hls.base.config.MqConfig;
 import com.hls.base.dto.DelTempMedia;
+import com.hls.base.po.Album;
+import com.hls.base.po.Singer;
+import com.hls.base.po.Song;
 import com.hls.base.utils.AuditState;
 import com.hls.base.utils.MqBase;
 import com.hls.content.dto.AlbumDetailDto;
@@ -19,7 +22,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 

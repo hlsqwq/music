@@ -1,7 +1,7 @@
 package com.hls.content.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.hls.content.po.Album;
+import com.hls.base.po.Album;
 import org.apache.ibatis.annotations.Mapper;
 
 /**

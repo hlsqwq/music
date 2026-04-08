@@ -5,13 +5,10 @@ import com.hls.base.PageResult;
 
 import com.hls.content.config.Access;
 import com.hls.content.dto.AlbumDetailDto;
-import com.hls.content.po.Album;
+import com.hls.base.po.Album;
 import com.hls.content.service.IAlbumService;
-import com.hls.content.service.ISingerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * <p>

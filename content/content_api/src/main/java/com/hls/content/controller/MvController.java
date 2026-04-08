@@ -2,8 +2,7 @@ package com.hls.content.controller;
 
 import com.hls.base.PageParam;
 import com.hls.base.PageResult;
-import com.hls.content.config.Access;
-import com.hls.content.po.Mv;
+import com.hls.base.po.Mv;
 import com.hls.content.service.IMvService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

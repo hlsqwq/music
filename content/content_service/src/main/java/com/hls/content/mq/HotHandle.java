@@ -3,7 +3,7 @@ package com.hls.content.mq;
 
 import com.hls.base.config.MqConfig;
 import com.hls.content.dto.HotDataDto;
-import com.hls.content.po.Mv;
+import com.hls.base.po.Mv;
 import com.hls.content.service.IAlbumService;
 import com.hls.content.service.IMvService;
 import com.hls.content.service.ISingerService;

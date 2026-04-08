@@ -4,12 +4,10 @@ package com.hls.content.controller;
 import com.hls.base.PageParam;
 import com.hls.base.PageResult;
 import com.hls.base.R;
-import com.hls.content.dto.EditSingerDto;
 import com.hls.content.dto.SongDto;
-import com.hls.content.po.Song;
+import com.hls.base.po.Song;
 import com.hls.content.service.ISongService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

@@ -2,16 +2,14 @@ package com.hls.content.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.hls.base.PageParam;
 import com.hls.base.R;
 import com.hls.base.config.UserContext;
 import com.hls.base.utils.MqBase;
 import com.hls.content.dto.SongListDto;
 import com.hls.content.mapper.SongListMapper;
-import com.hls.content.po.Song;
-import com.hls.content.po.SongList;
+import com.hls.base.po.Song;
+import com.hls.base.po.SongList;
 import com.hls.content.po.SongSongList;
 import com.hls.content.po.TextInfo;
 import com.hls.content.service.ISongListService;

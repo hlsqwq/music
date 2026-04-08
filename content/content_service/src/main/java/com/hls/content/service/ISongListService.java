@@ -1,12 +1,9 @@
 package com.hls.content.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.hls.base.PageParam;
 import com.hls.base.R;
 import com.hls.content.dto.SongListDto;
-import com.hls.content.po.SongList;
-
-import java.util.List;
+import com.hls.base.po.SongList;
 
 /**
  * <p>

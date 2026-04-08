@@ -3,15 +3,12 @@ package com.hls.content.controller;
 
 import com.hls.base.R;
 import com.hls.content.dto.EditSingerDto;
-import com.hls.content.dto.SingerDetailDto;
 import com.hls.content.dto.SingerDto;
-import com.hls.content.po.Singer;
+import com.hls.base.po.Singer;
 import com.hls.content.service.ISingerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * <p>

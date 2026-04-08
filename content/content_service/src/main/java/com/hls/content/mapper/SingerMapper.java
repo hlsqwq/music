@@ -1,7 +1,7 @@
 package com.hls.content.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.hls.content.po.Singer;
+import com.hls.base.po.Singer;
 import org.apache.ibatis.annotations.Mapper;
 
 /**

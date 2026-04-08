@@ -1,6 +1,6 @@
 package com.hls.content.dto;
 
-import com.hls.content.po.Song;
+import com.hls.base.po.Song;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
