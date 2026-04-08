@@ -1,0 +1,10 @@
+
+
+###
+GET {{gateway}}/sms/captcha/create
+
+
+###
+GET {{gateway}}/sms/captcha/validate?
+    uuid=45220570-8989-4feb-91b8-4e122b3c3649&
+    code=opi2
