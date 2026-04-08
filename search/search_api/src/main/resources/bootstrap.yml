@@ -15,8 +15,20 @@ spring:
         group: music
         file-extension: yaml
         refresh-enabled: true
+        shared-configs:
+          - data-id: jdbc.yaml
+            group: music
+            refresh: true
+          - data-id: es.yaml
+            group: music
+            refresh: true
+          - data-id: redis.yaml
+            group: music
+            refresh: true
+          - data-id: mq.yaml
+            group: music
+            refresh: true
+
     config:
       override-none: true
-  elasticsearch:
-    uris: http://192.168.124.8:9200
 
