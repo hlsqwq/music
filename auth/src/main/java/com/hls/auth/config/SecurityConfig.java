@@ -46,8 +46,8 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 // 配置授权规则
                 .authorizeHttpRequests(authorize ->
-                        authorize.requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/auth/oauth2/jwks").permitAll()
+                        authorize.requestMatchers(HttpMethod.POST, "/login").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/oauth2/jwks").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/v3/api-docs", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                                 // 其他所有请求：必须认证后才能访问
                                 .anyRequest().authenticated()

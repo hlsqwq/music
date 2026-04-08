@@ -19,9 +19,6 @@ spring:
           - data-id: jdbc.yaml
             group: music
             refresh: true
-          - data-id: path.yaml
-            group: music
-            refresh: true
           - data-id: redis.yaml
             group: music
             refresh: true
@@ -40,9 +37,6 @@ spring:
     config:
       override-none: true
 
-server:
-  servlet:
-    context-path: /media
 
 
 
