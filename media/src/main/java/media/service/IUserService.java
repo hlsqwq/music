@@ -1,9 +1,7 @@
-package com.hls.auth.service;
+package media.service;
 
+import media.po.User;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.hls.base.R;
-import com.hls.base.po.User;
-
 
 /**
  * <p>
@@ -11,9 +9,8 @@ import com.hls.base.po.User;
  * </p>
  *
  * @author hls
- * @since 2026-01-17
+ * @since 2026-04-11
  */
 public interface IUserService extends IService<User> {
 
-    R<Object> register(User user);
 }

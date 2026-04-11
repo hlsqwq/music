@@ -15,6 +15,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -26,17 +27,14 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private final UserDetailsServiceImpl userDetailsService;
+    private final PasswordEncoder passwordEncoder;
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
         AuthenticationManagerBuilder sharedObject = http.getSharedObject(AuthenticationManagerBuilder.class);
         return sharedObject.userDetailsService(userDetailsService)
-                .passwordEncoder(passwordEncoder()).and().build();
+                .passwordEncoder(passwordEncoder).and().build();
     }
 
 
@@ -47,14 +45,14 @@ public class SecurityConfig {
                 // 配置授权规则
                 .authorizeHttpRequests(authorize ->
                         authorize.requestMatchers(HttpMethod.POST, "/login").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/user/register").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/oauth2/jwks").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/v3/api-docs", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                                 // 其他所有请求：必须认证后才能访问
-                                .anyRequest().authenticated()
-                )
+                                .anyRequest().authenticated())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
     }
-
 
 
     //todo    @PreAuthorize("hasAnyRole('ROLE_管理员','ROLE_访客')")

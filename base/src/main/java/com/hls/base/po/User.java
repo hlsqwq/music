@@ -15,7 +15,7 @@ import lombok.experimental.Accessors;
  * </p>
  *
  * @author hls
- * @since 2026-03-27
+ * @since 2026-04-11
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -70,11 +70,6 @@ public class User implements Serializable {
      * 粉丝数
      */
     private Integer fansNum;
-
-    /**
-     * 默认“我喜欢”歌单ID
-     */
-    private Integer songListId;
 
     /**
      * 权限：普通会员/副管理员/管理员

@@ -33,6 +33,7 @@ public class GlobalAutoFilterConfig {
         white.add("/captcha");
         white.add("/v3/api-docs");
         white.add("/swagger-ui");
+        white.add("/register");
     }
 
     @Order(value = -100)

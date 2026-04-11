@@ -2,15 +2,18 @@ package com.hls.auth.config;
 
 
 import com.hls.auth.po.LoginSuccessDto;
-import com.hls.auth.po.TokenInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.jwt.*;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
-import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -18,6 +21,11 @@ import java.util.Map;
 public class TokenUtils {
 
     private final JwtEncoder jwtEncoder;
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
 
     public LoginSuccessDto getToken(Authentication authentication) {

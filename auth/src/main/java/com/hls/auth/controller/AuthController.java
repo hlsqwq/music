@@ -5,6 +5,8 @@ import com.alibaba.fastjson2.JSON;
 import com.hls.auth.config.TokenUtils;
 import com.hls.auth.po.AuthParams;
 import com.hls.auth.po.LoginSuccessDto;
+import com.hls.base.R;
+import com.hls.base.po.User;
 import com.nimbusds.jose.KeySourceException;
 import com.nimbusds.jose.jwk.JWKMatcher;
 import com.nimbusds.jose.jwk.JWKSelector;
@@ -65,6 +67,9 @@ public class AuthController {
         //todo 存入redis
         return tokenUtils.getToken(authentication);
     }
+
+
+
 
 
     @GetMapping("/oauth2/jwks")
