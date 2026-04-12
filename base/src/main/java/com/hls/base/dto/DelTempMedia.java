@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DelTempMedia {
-    Integer MediaId;
-    String key;
+    Integer userMediaId;
+    String md5;
     String bucketName;
     String filePath;
 }

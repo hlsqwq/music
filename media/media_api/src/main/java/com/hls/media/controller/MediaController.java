@@ -34,10 +34,10 @@ public class MediaController {
      *
      * @param fileMd5  文件MD5
      * @param fileName 文件名
-     * @return 上传返回，ok，未上传，签证
+     * @return 如果存在返回 ok 不存在 签证 其他用户正在上传 busy
      */
     @GetMapping("/check/file")
-    public String checkFile(String fileMd5, String fileName) {
+    public R<String> checkFile(String fileMd5, String fileName) {
         return mediaService.checkFile(fileMd5, fileName);
     }
 
@@ -50,7 +50,7 @@ public class MediaController {
      * @return 如果存在返回 ok 不存在 签证 其他用户正在上传 busy
      */
     @GetMapping("/check/chunk")
-    public String checkChunk(Integer id, String chunkMd5, String fileMd5) {
+    public R<String> checkChunk(Integer id, String chunkMd5, String fileMd5) {
         return mediaService.checkChunk(id, chunkMd5, fileMd5);
     }
 

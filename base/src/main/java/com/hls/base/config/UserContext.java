@@ -1,13 +1,15 @@
 package com.hls.base.config;
 
-public class UserContext {
-    private static final ThreadLocal<Integer> USER_THREAD_LOCAL = new ThreadLocal<>();
+import com.hls.base.po.UserInfo;
 
-    public static void setUser(Integer userId) {
-        USER_THREAD_LOCAL.set(userId);
+public class UserContext {
+    private static final ThreadLocal<UserInfo> USER_THREAD_LOCAL = new ThreadLocal<>();
+
+    public static void setUser(UserInfo userInfo) {
+        USER_THREAD_LOCAL.set(userInfo);
     }
 
-    public static Integer getUser() {
+    public static UserInfo getUser() {
         return USER_THREAD_LOCAL.get();
     }
 

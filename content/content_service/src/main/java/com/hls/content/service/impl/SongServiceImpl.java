@@ -93,6 +93,18 @@ public class SongServiceImpl extends ServiceImpl<SongMapper, Song> implements IS
         updateBatchById(list);
     }
 
+    @Override
+    public R<PageResult<Song>> getSongs(PageParam pageParam) {
+        Page<Song> objectPage = Page.of(pageParam.getNum(), pageParam.getSize());
+        Page<Song> page = page(objectPage);
+        PageResult<Song> songPageResult = new PageResult<>();
+        songPageResult.setTotal(page.getTotal());
+        songPageResult.setItem(page.getRecords());
+        songPageResult.setSize(pageParam.getSize());
+        songPageResult.setNum(pageParam.getNum());
+        return R.success(songPageResult);
+    }
+
     /**
      * 增加歌曲
      *

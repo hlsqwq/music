@@ -1,6 +1,7 @@
 package com.hls.auth.service.impl;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.hls.auth.po.AuthParams;
 import com.hls.auth.service.Auth;
 import com.hls.auth.service.IUserService;
@@ -34,8 +35,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         AuthParams authParams = JSON.parseObject(s, AuthParams.class);
         Auth bean = (Auth) applicationContext.getBean(authParams.getMethod());
         com.hls.base.po.User auth = bean.auth(authParams);
-        log.info(auth.getPasswd());
-        return User.withUsername(auth.getAccount())
+        String jsonString = JSONObject.toJSONString(auth);
+        return User.withUsername(jsonString)
                 .password(auth.getPasswd())
                 .authorities(auth.getAccess())
                 .build();

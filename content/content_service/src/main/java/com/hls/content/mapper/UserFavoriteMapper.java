@@ -1,7 +1,8 @@
-package com.hls.auth.mapper;
+package com.hls.content.mapper;
 
-import media.po.UserFavorite;
+
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.hls.content.po.UserFavorite;
 
 /**
  * <p>

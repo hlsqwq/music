@@ -1,4 +1,4 @@
-package com.hls.base.po;
+package com.hls.content.po;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;

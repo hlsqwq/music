@@ -1,12 +1,9 @@
 package com.hls.media.controller;
 
 
-import com.hls.base.R;
 import com.hls.media.service.IUserMediaService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -24,11 +21,6 @@ public class UserMediaController {
 
     private final IUserMediaService  userMediaService;
 
-
-    @DeleteMapping("/del/{id}")
-    public R<Object> delete(@RequestParam("id") Integer id) {
-        return userMediaService.del(id);
-    }
 
 
 }

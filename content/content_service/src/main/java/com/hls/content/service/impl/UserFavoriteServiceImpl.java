@@ -1,9 +1,11 @@
-package com.hls.auth.service.impl;
+package com.hls.content.service.impl;
 
-import media.po.UserFavorite;
-import media.mapper.UserFavoriteMapper;
-import media.service.IUserFavoriteService;
+
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+
+import com.hls.content.mapper.UserFavoriteMapper;
+import com.hls.content.po.UserFavorite;
+import com.hls.content.service.IUserFavoriteService;
 import org.springframework.stereotype.Service;
 
 /**

@@ -2,7 +2,6 @@ package com.hls.gateway.config;
 
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,15 +9,10 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder;
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
-import org.springframework.web.reactive.function.client.WebClient;
 
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @RequiredArgsConstructor
 @Configuration
@@ -54,14 +48,14 @@ public class GlobalAutoFilterConfig {
             return decode.decode(token)
                     .flatMap(jwt -> {
                         // 校验通过，可以从 jwt 中获取 Claims（如用户 ID、权限）
-                        String userId = jwt.getClaimAsString("sub"); // 假设 sub 是用户 ID
-
+                        String userName = jwt.getClaimAsString("sub"); // 假设 sub 是用户 ID
+                        String userId = jwt.getClaimAsString("id");
+                        String access = jwt.getClaimAsString("access");
                         // 4. 将用户信息通过 Header 传递给下游微服务（mutate 模式）
                         ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
-                                .header("UserId", userId)
-                                //todo 权限获取
-//                                .header("X-User-Roles", jwt.getClaimAsStringList("authorities")
-//                                        .toString())
+                                .header("id", userId)
+                                .header("access", access)
+                                .header("name", userName)
                                 .build();
 
                         return chain.filter(exchange.mutate().request(mutatedRequest).build());

@@ -7,6 +7,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hls.base.R;
 import com.hls.base.config.MqConfig;
 import com.hls.base.config.UserContext;
+import com.hls.base.exception.MusicException;
+import com.hls.base.po.UserInfo;
 import com.hls.base.utils.MqBase;
 import com.hls.media.config.MinioConfig;
 import com.hls.base.dto.DelTempMedia;
@@ -52,7 +54,8 @@ public class UserMediaServiceImpl extends ServiceImpl<UserMediaMapper, UserMedia
     public void saveToDb(Integer mediaId) {
         Media byId = MediaService.getById(mediaId);
         UserMedia userMedia = BeanUtil.copyProperties(byId, UserMedia.class);
-        userMedia.setUserId(UserContext.getUser());
+        UserInfo user = UserContext.getUser();
+        userMedia.setUserId(user.getId());
         userMedia.setId(null);
         userMedia.setMediaId(byId.getId());
         userMedia.setMediaUrl(byId.getUrl());
@@ -61,28 +64,29 @@ public class UserMediaServiceImpl extends ServiceImpl<UserMediaMapper, UserMedia
     }
 
 
+    /**
+     * 删除用户media
+     *
+     * @param id
+     * @return
+     */
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public R<Object> del(Integer id) {
-        Integer userId = UserContext.getUser();
+    public Integer del(Integer id) {
         UserMedia byId = getById(id);
         if (byId == null) {
-            return R.failure("没有资源文件");
-        }
-        if (!Objects.equals(byId.getUserId(), userId)) {
-            return R.failure("不可以删除他人资源");
+            MusicException.cast("没有资源文件");
+            return -1;
         }
         removeById(id);
-        LambdaQueryWrapper<UserMedia> eq = new LambdaQueryWrapper<UserMedia>()
-                .eq(UserMedia::getMediaId, byId.getMediaId());
-        List<UserMedia> list = list(eq);
-        if (list.isEmpty()) {
-            Media byId1 = MediaService.getById(byId.getMediaId());
+        Media byId2 = MediaService.getById(byId.getMediaId());
+        byId2.setRefCount(byId2.getRefCount() - 1);
+        if (byId2.getRefCount() > 0) {
+            MediaService.updateById(byId2);
+        } else {
             MediaService.removeById(byId.getMediaId());
-            mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY,
-                    new DelTempMedia(null,null, minioConfig.music, byId1.getPath()));
         }
-        return R.success();
+        return byId2.getRefCount();
     }
 
     @Override

@@ -1,4 +1,5 @@
-package com.hls.base.exception;
+package com.hls.media.dto;
+
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,8 +10,8 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class RestErrorResponse implements Serializable {
-
-    private String errMessage;
-
+public class FileCheckState implements Serializable {
+    private String state;
+    private Integer mediaId;
+    private String md5;
 }

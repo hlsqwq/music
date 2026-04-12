@@ -28,7 +28,7 @@ public interface IMediaService extends IService<Media> {
      * @param fileName 文件名
      * @return 上传返回，ok，未上传，签证
      */
-    String checkFile(String fileMd5, String fileName);
+    R<String> checkFile(String fileMd5, String fileName);
 
     /**
      * 检查分块文件是否存在
@@ -38,7 +38,7 @@ public interface IMediaService extends IService<Media> {
      * @param fileMd5  完整文件的MD5
      * @return 如果存在返回 ok 不存在 签证 其他用户正在上传 busy
      */
-    String checkChunk(Integer id, String chunkMd5, String fileMd5);
+    R<String> checkChunk(Integer id, String chunkMd5, String fileMd5);
 
     R<Object> merge(int total, String fileMd5, String fileName);
 }

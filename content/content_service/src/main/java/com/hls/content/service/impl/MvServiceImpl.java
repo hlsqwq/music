@@ -6,6 +6,7 @@ import com.hls.base.PageParam;
 import com.hls.base.PageResult;
 import com.hls.base.config.UserContext;
 import com.hls.base.dto.DelTempMedia;
+import com.hls.base.po.UserInfo;
 import com.hls.base.utils.RedisBase;
 import com.hls.content.utils.RedisHotUtil;
 import com.hls.base.po.Mv;
@@ -144,7 +145,8 @@ public class MvServiceImpl extends ServiceImpl<MvMapper, Mv> implements IMvServi
      */
     @Override
     public Long incrOrDecrLikeNum(Integer mvId) {
-        Integer userId = UserContext.getUser();
+        UserInfo user = UserContext.getUser();
+        Integer userId = user.getId();
         String key1 = redisBase.getKey("userLikeBitmap", "mv");
         String key2 = redisBase.getKey("like", "mv", mvId);
         String key3 = redisBase.getKey("likeSet", "mv");

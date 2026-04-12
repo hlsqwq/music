@@ -1,4 +1,4 @@
-package com.hls.auth.controller;
+package com.hls.content.controller;
 
 
 import org.springframework.web.bind.annotation.RequestMapping;

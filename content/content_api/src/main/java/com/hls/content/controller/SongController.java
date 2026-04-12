@@ -28,6 +28,14 @@ public class SongController {
 
     private final ISongService songService;
 
+
+
+    @GetMapping
+    public R<PageResult<Song>> getSongs(@RequestBody PageParam pageParam) {
+        return songService.getSongs(pageParam);
+    }
+
+
     /**
      * 分页查询歌手歌曲
      *

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hls.base.R;
 import com.hls.base.config.UserContext;
+import com.hls.base.po.UserInfo;
 import com.hls.base.utils.MqBase;
 import com.hls.content.dto.SongListDto;
 import com.hls.content.mapper.SongListMapper;
@@ -45,7 +46,8 @@ public class SongListServiceImpl extends ServiceImpl<SongListMapper, SongList> i
     @Transactional(rollbackFor = Exception.class)
     @Override
     public R<Object> addSongList(SongList songList) {
-        Integer userId = UserContext.getUser();
+        UserInfo user = UserContext.getUser();
+        Integer userId = user.getId();
         songList.setUserId(userId);
         String introduction = songList.getIntroduction();
         String substring = introduction.substring(50);

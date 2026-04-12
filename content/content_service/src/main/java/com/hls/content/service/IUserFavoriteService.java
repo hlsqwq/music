@@ -1,7 +1,8 @@
-package com.hls.auth.service;
+package com.hls.content.service;
 
-import media.po.UserFavorite;
+
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hls.content.po.UserFavorite;
 
 /**
  * <p>

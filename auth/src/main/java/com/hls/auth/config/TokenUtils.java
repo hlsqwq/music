@@ -1,7 +1,9 @@
 package com.hls.auth.config;
 
 
+import com.alibaba.fastjson2.JSONObject;
 import com.hls.auth.po.LoginSuccessDto;
+import com.hls.base.po.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -31,16 +33,18 @@ public class TokenUtils {
     public LoginSuccessDto getToken(Authentication authentication) {
         String authorities = authentication.getAuthorities().toString();
         authorities = authorities.replace("[", "").replace("]", "");
-
         Instant now = Instant.now();
         long expiry = 3600L; // 1小时有效期
+
+        User user = JSONObject.parseObject(authentication.getName(), User.class);
 
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("yixiao") // 签发者
                 .issuedAt(now)             // 签发时间
                 .expiresAt(now.plusSeconds(expiry)) // 过期时间
-                .subject(authentication.getName())  // 用户名
-                .claim("access", authorities)
+                .subject(user.getName())  // 用户名
+                .claim("id", user.getId()) //用户id
+                .claim("access", authorities) //用户权限
                 .build();
 
         // 2. 使用 JwtEncoder 进行签名生成 Token
@@ -49,8 +53,6 @@ public class TokenUtils {
         // 3. 构建返回给前端的 JSON 数据
         LoginSuccessDto loginSuccessDto = new LoginSuccessDto();
         loginSuccessDto.setToken(token);
-        loginSuccessDto.setCode(200);
-        loginSuccessDto.setMessage("ok");
         loginSuccessDto.setExpires(expiry);
         loginSuccessDto.setToken_type("Bearer");
         return loginSuccessDto;

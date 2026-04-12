@@ -62,4 +62,6 @@ public interface ISongService extends IService<Song> {
     R<Object> updateSong(SongDto songDto);
 
     void updateSongPlay(List<HotDataDto> task);
+
+    R<PageResult<Song>> getSongs(PageParam pageParam);
 }

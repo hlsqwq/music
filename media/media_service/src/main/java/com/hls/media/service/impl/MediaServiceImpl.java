@@ -1,21 +1,23 @@
 package com.hls.media.service.impl;
 
 
-import cn.hutool.core.lang.Pair;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hls.base.R;
 import com.hls.base.config.MqConfig;
 import com.hls.base.config.UserContext;
+import com.hls.base.po.UserInfo;
 import com.hls.base.utils.*;
 import com.hls.media.config.MinioConfig;
 import com.hls.base.dto.DelTempMedia;
+import com.hls.media.dto.FileCheckState;
 import com.hls.media.mapper.MediaMapper;
 import com.hls.media.po.Media;
 import com.hls.media.service.IMediaService;
 import com.hls.media.service.IUserMediaService;
 import io.minio.*;
 import io.minio.http.Method;
+import kotlin.Pair;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
@@ -26,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -202,64 +205,77 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
      * @return 如果存在返回 ok 不存在 签证 其他用户正在上传 busy
      */
     @Override
-    public String checkFile(String fileMd5, String fileName) {
+    public R<String> checkFile(String fileMd5, String fileName) {
         String fileType = getFileType(fileName);
         if (fileType.equals("unknow")) {
-            return "failure";
+            return R.failure("failure");
         }
         String key = redisKeys.checkFileExist(fileMd5);
 
         // 1. 第一级：Redis 快速过滤
-        Pair status = redisBase.get(key, Pair.class);
-        if ("ok".equals(status.getKey())) {
-            userMediaService.saveToDb((Integer) status.getValue());
-            return "ok"; // 秒传成功
+        FileCheckState status = redisBase.get(key, FileCheckState.class);
+        if (status != null) {
+            if ("ok".equals(status.getState())) {
+                userMediaService.saveToDb(status.getMediaId());
+                return R.success("ok"); // 秒传成功
+            } else if ("ing".equals(status.getState())) {
+                return R.failure("busy"); // 提示用户正在处理中，请稍后
+            }
         }
-        if ("ing".equals(status.getKey())) {
-            return "busy"; // 提示用户正在处理中，请稍后
-        }
+
 
         // 2. 第二级：数据库元数据拦截（防止缓存失效后的穿透）
         Media media = getOne(new LambdaQueryWrapper<Media>()
                 .eq(Media::getMd5, fileMd5).last("limit 1"));
         if (media != null) {
-            redisBase.set(key, "ok"); // 补填缓存
-            return "ok";
+            redisBase.set(key, new FileCheckState("ok", media.getId(), fileMd5)); // 补填缓存
+            return R.success("ok");
         }
 
         // 3. 第三级：加锁进行物理检查与发证
         RLock lock = redissonClient.getLock("lock:file:" + fileMd5);
         if (lock.tryLock()) {
-            // Double Check: 拿锁后再次确认状态
-            if (redisBase.get(key, String.class).equals("ok"))
-                return "ok";
+            try {
+                // Double Check: 拿锁后再次确认状态
+                String s = redisBase.get(key, String.class);
+                if (s != null && s.equals("ok"))
+                    return R.success("ok");
 
-            // 物理检查：看 MinIO 里是否真的有残留文件
-            StatObjectResponse stat = getStatFile(fileMd5, fileName);
-            if (stat != null) {
-                // 校验文件完整性（注意：分片上传的 ETag 包含横杠）
-                if (stat.etag().contains(fileMd5)) {
-                    // 异步转存并记录数据库（使用代理对象保证事务生效）
-                    Integer id = applicationContext.getBean(MediaServiceImpl.class)
-                            .saveToDb(fileMd5, fileName, (int) stat.size());
-                    redisBase.set(key, Pair.of("ok", id));
-                    return "ok";
+                // 物理检查：看 MinIO 里是否真的有残留文件
+                StatObjectResponse stat = getStatFile(fileMd5, fileName);
+                if (stat != null) {
+                    // 校验文件完整性（注意：分片上传的 ETag 包含横杠）
+                    if (stat.etag().contains(fileMd5)) {
+                        // 异步转存并记录数据库（使用代理对象保证事务生效）
+                        Integer id = applicationContext.getBean(MediaServiceImpl.class)
+                                .saveToDb(fileMd5, fileName, (int) stat.size());
+                        redisBase.set(key, new FileCheckState("ok", id, fileMd5));
+                        return R.success("ok");
+                    }
+                }
+
+                // 4. 确定没传过，开始发证
+                String signature = getSignatureFile(fileMd5, fileName);
+
+                // 设置为 "ING" 状态，有效期建议与签证有效期一致
+                redisBase.set(key, new FileCheckState("ing", null, fileMd5),
+                        5L, TimeUnit.SECONDS);
+
+                // 投递延迟清理消息：如果 1 小时后还是 "ING"，说明上传失败，删掉 Redis 状态
+                mqBase.sendDelayHourMessageToMusic(MqConfig.MEDIA_TEMP_KEY,
+                        new DelTempMedia(null, fileMd5, minioConfig.music, getFilePath(fileMd5, fileName)));
+
+                return R.failure(signature);
+            } catch (Exception e) {
+                log.error(e.getMessage());
+                return R.failure("failure");
+            } finally {
+                if (lock.isHeldByCurrentThread()) {
+                    lock.unlock();
                 }
             }
-
-            // 4. 确定没传过，开始发证
-            String signature = getSignatureFile(fileMd5, fileName);
-
-            // 设置为 "ING" 状态，有效期建议与签证有效期一致
-            redisBase.set(key, "ing");
-
-            // 投递延迟清理消息：如果 1 小时后还是 "ING"，说明上传失败，删掉 Redis 状态
-            mqBase.sendDelayHourMessageToMusic(MqConfig.MEDIA_TEMP_KEY,
-                    new DelTempMedia(null,key, minioConfig.music, getFilePath(fileMd5, fileName)));
-
-            return signature;
         } else {
-            return "busy";
+            return R.failure("failure");
         }
 
     }
@@ -275,7 +291,8 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
      */
     @Transactional
     public Integer saveToDb(String md5, String fileName, int size) {
-        Integer userId = UserContext.getUser();
+        UserInfo user = UserContext.getUser();
+        Integer userId = user.getId();
         String filePath = getFilePath(md5, fileName);
         Media media = new Media();
         media.setBucket(minioConfig.music);
@@ -295,7 +312,7 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
     }
 
     private String getFileType(String fileName) {
-        fileName = fileName.substring(fileName.lastIndexOf("."));
+        fileName = fileName.substring(fileName.lastIndexOf(".") + 1);
         if (audio.contains(fileName)) {
             return "audio";
         } else if (video.contains(fileName)) {
@@ -317,48 +334,62 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
      * @return 如果存在返回 ok 不存在 签证 其他用户正在上传 busy
      */
     @Override
-    public String checkChunk(Integer id, String chunkMd5, String fileMd5) {
+    public R<String> checkChunk(Integer id, String chunkMd5, String fileMd5) {
         String key = redisKeys.checkChunkExist(chunkMd5, id);
 
         // 1. 第一级：Redis 快速过滤
         String status = redisBase.get(key, String.class);
-        if ("ok".equals(status)) {
-            return "ok"; // 秒传成功
+        if (status != null) {
+            if ("ok".equals(status)) {
+                return R.success("ok"); // 秒传成功
+            }
+            if ("ing".equals(status)) {
+                return R.failure("busy"); // 提示用户正在处理中，请稍后
+            }
         }
-        if ("ing".equals(status)) {
-            return "busy"; // 提示用户正在处理中，请稍后
-        }
+
 
         // 3. 第三级：加锁进行物理检查与发证
         RLock lock = redissonClient.getLock("lock:file:" + chunkMd5);
         if (lock.tryLock()) {
-            // Double Check: 拿锁后再次确认状态
-            if (redisBase.get(key, String.class).equals("ok"))
-                return "ok";
+            try {
+                // Double Check: 拿锁后再次确认状态
+                String s = redisBase.get(key, String.class);
+                if (s != null && s.equals("ok"))
+                    return R.success("ok");
 
-            // 物理检查：看 MinIO 里是否真的有残留文件
-            StatObjectResponse stat = getStatChunk(id, fileMd5);
-            if (stat != null) {
-                // 校验文件完整性（注意：分片上传的 ETag 包含横杠）
-                if (stat.etag().contains(chunkMd5)) {
-                    redisBase.set(key, "ok");
-                    return "ok";
+                // 物理检查：看 MinIO 里是否真的有残留文件
+                StatObjectResponse stat = getStatChunk(id, fileMd5);
+                if (stat != null) {
+                    // 校验文件完整性（注意：分片上传的 ETag 包含横杠）
+                    if (stat.etag().contains(chunkMd5)) {
+                        redisBase.set(key, "ok");
+                        return R.success("ok");
+                    }
+                }
+
+                // 4. 确定没传过，开始发证
+                String signature = getSignatureChunk(id, fileMd5);
+
+                // 设置为 "ING" 状态，有效期建议与签证有效期一致
+                redisBase.set(key, "ing", 5L, TimeUnit.SECONDS);
+
+                // 投递延迟清理消息：如果 1 小时后还是 "ING"，说明上传失败，删掉 Redis 状态
+                mqBase.sendDelayHourMessageToMusic(MqConfig.MEDIA_TEMP_KEY,
+                        new DelTempMedia(null, chunkMd5, minioConfig.music, getChunkPath(id, fileMd5)));
+
+                return R.failure(signature);
+            } catch (Exception e) {
+                log.error("checkChunk", e);
+                return R.failure("failure");
+
+            } finally {
+                if (lock.isHeldByCurrentThread()) {
+                    lock.unlock();
                 }
             }
-
-            // 4. 确定没传过，开始发证
-            String signature = getSignatureChunk(id, fileMd5);
-
-            // 设置为 "ING" 状态，有效期建议与签证有效期一致
-            redisBase.set(key, "ing");
-
-            // 投递延迟清理消息：如果 1 小时后还是 "ING"，说明上传失败，删掉 Redis 状态
-            mqBase.sendDelayHourMessageToMusic(MqConfig.MEDIA_TEMP_KEY,
-                    new DelTempMedia(null,key, minioConfig.music, getChunkPath(id, fileMd5)));
-
-            return signature;
         } else {
-            return "busy";
+            return R.failure("busy");
         }
     }
 
@@ -392,6 +423,9 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
 
     @Override
     public R<Object> merge(int total, String fileMd5, String fileName) {
+        UserInfo user = UserContext.getUser();
+        Integer userId = user.getId();
+
         if (!checkChunkNum(total, fileMd5)) {
             log.error("分块数量缺失");
             return R.failure("分块数量缺失");
@@ -414,47 +448,17 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
             log.error("md5:{},fileName:{}分块合并失败{}", fileMd5, fileName, e.getMessage());
             return R.failure("合并分块失败");
         }
-        StatObjectResponse stat = getStatFile(fileMd5, fileName);
-        if (stat == null || !stat.etag().contains(fileMd5)) {
+        String key = redisKeys.checkFileExist(fileMd5);
+        FileCheckState fileCheckState = redisBase.get(key, FileCheckState.class);
+        if (fileCheckState != null && !Objects.equals(fileCheckState.getMd5(), fileMd5)) {
             return R.failure("合并分块失败");
         }
 
+        StatObjectResponse statFile = getStatFile(fileMd5, fileName);
+
         applicationContext.getBean(MediaServiceImpl.class)
-                .saveToDb(fileMd5, fileName, (int) stat.size());
+                .saveToDb(fileMd5, fileName, (int) statFile.size());
 
         return R.success();
     }
-
-//    @Transactional(rollbackFor = Exception.class)
-//    @Override
-//    public void del(String url) {
-//        LambdaQueryWrapper<Media> qw = new LambdaQueryWrapper<Media>()
-//                .eq(Media::getUrl, url);
-//        Media one = getOne(qw);
-//        if (one == null) {
-//            return;
-//        }
-//        one.setRefNum(one.getRefNum() - 1);
-//        if (one.getRefNum() <= 0) {
-//            remove(qw);
-//        } else {
-//            updateById(one);
-//        }
-//    }
-//
-//    @Transactional(rollbackFor = Exception.class)
-//    @Override
-//    public void add(Media media) {
-//        LambdaQueryWrapper<Media> qw = new LambdaQueryWrapper<Media>()
-//                .eq(Media::getUrl, media.getUrl());
-//        Media one = getOne(qw);
-//        if (one == null) {
-//            save(media);
-//        } else {
-//            one.setRefNum(one.getRefNum() + 1);
-//            updateById(one);
-//        }
-//    }
-
-
 }

@@ -6,6 +6,7 @@ import com.hls.auth.config.TokenUtils;
 import com.hls.auth.po.AuthParams;
 import com.hls.auth.po.LoginSuccessDto;
 import com.hls.base.R;
+import com.hls.base.exception.MusicException;
 import com.hls.base.po.User;
 import com.nimbusds.jose.KeySourceException;
 import com.nimbusds.jose.jwk.JWKMatcher;
@@ -17,8 +18,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
@@ -51,25 +54,37 @@ public class AuthController {
      * @return 登录成功信息
      */
     @PostMapping("/login")
-    public LoginSuccessDto login(@RequestBody AuthParams authParams) {
+    public R<LoginSuccessDto> login(@RequestBody AuthParams authParams) throws Throwable {
         // 1. 封装认证请求参数（注意：这里的 principal 传入 AuthParams 的 JSON 字符串，对应 loadUserByUsername 的入参 s）
         String principal = JSON.toJSONString(authParams);
         // 凭证（密码，前后端分离中可以传空，因为我们的逻辑在 loadUserByUsername 中已处理，这里只是满足框架要求）
         String credentials = authParams.getPassword();
 
         // 2. 调用认证管理器完成认证（框架会自动调用 customUserDetailsService.loadUserByUsername 方法）
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(principal, credentials)
-        );
+        Authentication authentication = null;
+        try {
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(principal, credentials)
+            );
+        } catch (InternalAuthenticationServiceException e) {
+            Throwable cause = e.getCause();
 
-        //todo 验证码
+            // 2. 提取错误信息（针对你 MusicException 的特殊结构）
+            String message = "认证失败";
+            if (cause instanceof MusicException) {
+                // 既然 getMessage() 是 null，直接拿你的 errMessage 字段
+                message = ((MusicException) cause).getErrMessage();
+            } else if (cause != null) {
+                message = cause.getMessage();
+            }
+
+            return R.failure(message);
+        }
+
 
         //todo 存入redis
-        return tokenUtils.getToken(authentication);
+        return R.success(tokenUtils.getToken(authentication));
     }
-
-
-
 
 
     @GetMapping("/oauth2/jwks")

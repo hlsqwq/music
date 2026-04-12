@@ -26,7 +26,7 @@ public class GatewaySecurityConfig {
 
         // 这里的地址必须匹配你 Nacos 中的服务名
         // 如果你的服务名是 auth，那就写 http://auth/...
-        return NimbusReactiveJwtDecoder.withJwkSetUri("http://auth/oauth2/jwks")
+        return NimbusReactiveJwtDecoder.withJwkSetUri("http://auth/auth/oauth2/jwks")
                 .webClient(webClient) // 强制使用这个能识别 Nacos 的 webClient
                 .build();
     }
