@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,6 +28,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.PasswordAuthentication;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -66,6 +68,8 @@ public class AuthController {
             authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(principal, credentials)
             );
+        } catch (BadCredentialsException badCredentialsException) {
+            return R.failure("账号或者密码错误");
         } catch (InternalAuthenticationServiceException e) {
             Throwable cause = e.getCause();
 

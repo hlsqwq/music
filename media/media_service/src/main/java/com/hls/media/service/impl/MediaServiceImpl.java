@@ -15,6 +15,7 @@ import com.hls.media.mapper.MediaMapper;
 import com.hls.media.po.Media;
 import com.hls.media.service.IMediaService;
 import com.hls.media.service.IUserMediaService;
+import com.hls.media.vo.MediaVo;
 import io.minio.*;
 import io.minio.http.Method;
 import kotlin.Pair;
@@ -205,10 +206,10 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
      * @return 如果存在返回 ok 不存在 签证 其他用户正在上传 busy
      */
     @Override
-    public R<String> checkFile(String fileMd5, String fileName) {
+    public R<MediaVo> checkFile(String fileMd5, String fileName) {
         String fileType = getFileType(fileName);
         if (fileType.equals("unknow")) {
-            return R.failure("failure");
+            return R.failure("不支持的文件类型");
         }
         String key = redisKeys.checkFileExist(fileMd5);
 
@@ -216,8 +217,7 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
         FileCheckState status = redisBase.get(key, FileCheckState.class);
         if (status != null) {
             if ("ok".equals(status.getState())) {
-                userMediaService.saveToDb(status.getMediaId());
-                return R.success("ok"); // 秒传成功
+                return R.success(MediaVo.findIt(status.getMediaId(), status.getMediaUrl())); // 秒传成功
             } else if ("ing".equals(status.getState())) {
                 return R.failure("busy"); // 提示用户正在处理中，请稍后
             }
@@ -228,8 +228,8 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
         Media media = getOne(new LambdaQueryWrapper<Media>()
                 .eq(Media::getMd5, fileMd5).last("limit 1"));
         if (media != null) {
-            redisBase.set(key, new FileCheckState("ok", media.getId(), fileMd5)); // 补填缓存
-            return R.success("ok");
+            redisBase.set(key, new FileCheckState("ok", media.getId(), fileMd5, media.getUrl())); // 补填缓存
+            return R.success(MediaVo.findIt(media.getId(), media.getUrl()));
         }
 
         // 3. 第三级：加锁进行物理检查与发证
@@ -237,9 +237,14 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
         if (lock.tryLock()) {
             try {
                 // Double Check: 拿锁后再次确认状态
-                String s = redisBase.get(key, String.class);
-                if (s != null && s.equals("ok"))
-                    return R.success("ok");
+                status = redisBase.get(key, FileCheckState.class);
+                if (status != null) {
+                    if ("ok".equals(status.getState())) {
+                        return R.success(MediaVo.findIt(status.getMediaId(), status.getMediaUrl())); // 秒传成功
+                    } else if ("ing".equals(status.getState())) {
+                        return R.failure("busy"); // 提示用户正在处理中，请稍后
+                    }
+                }
 
                 // 物理检查：看 MinIO 里是否真的有残留文件
                 StatObjectResponse stat = getStatFile(fileMd5, fileName);
@@ -247,10 +252,11 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
                     // 校验文件完整性（注意：分片上传的 ETag 包含横杠）
                     if (stat.etag().contains(fileMd5)) {
                         // 异步转存并记录数据库（使用代理对象保证事务生效）
-                        Integer id = applicationContext.getBean(MediaServiceImpl.class)
+                        media = applicationContext.getBean(MediaServiceImpl.class)
                                 .saveToDb(fileMd5, fileName, (int) stat.size());
-                        redisBase.set(key, new FileCheckState("ok", id, fileMd5));
-                        return R.success("ok");
+                        redisBase.set(key, new FileCheckState("ok", media.getId(),
+                                fileMd5, media.getUrl())); // 补填缓存
+                        return R.success(MediaVo.findIt(media.getId(), media.getUrl()));
                     }
                 }
 
@@ -258,14 +264,14 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
                 String signature = getSignatureFile(fileMd5, fileName);
 
                 // 设置为 "ING" 状态，有效期建议与签证有效期一致
-                redisBase.set(key, new FileCheckState("ing", null, fileMd5),
+                redisBase.set(key, new FileCheckState("ing", null, fileMd5, null),
                         5L, TimeUnit.SECONDS);
 
                 // 投递延迟清理消息：如果 1 小时后还是 "ING"，说明上传失败，删掉 Redis 状态
                 mqBase.sendDelayHourMessageToMusic(MqConfig.MEDIA_TEMP_KEY,
                         new DelTempMedia(null, fileMd5, minioConfig.music, getFilePath(fileMd5, fileName)));
 
-                return R.failure(signature);
+                return R.failure("待上传", MediaVo.upload(signature));
             } catch (Exception e) {
                 log.error(e.getMessage());
                 return R.failure("failure");
@@ -290,7 +296,7 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
      * @return 媒资 id
      */
     @Transactional
-    public Integer saveToDb(String md5, String fileName, int size) {
+    public Media saveToDb(String md5, String fileName, int size) {
         UserInfo user = UserContext.getUser();
         Integer userId = user.getId();
         String filePath = getFilePath(md5, fileName);
@@ -303,12 +309,10 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
         media.setSize(size);
         media.setMd5(md5);
 //            http://192.168.124.8:9000/music/a3.png
-        media.setStatus(AuditState.auditing);
+        media.setStatus(AuditState.pass);
         media.setUserId(userId);
         save(media);
-        return media.getId();
-
-        //todo 加入审核
+        return media;
     }
 
     private String getFileType(String fileName) {
@@ -422,10 +426,7 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
     }
 
     @Override
-    public R<Object> merge(int total, String fileMd5, String fileName) {
-        UserInfo user = UserContext.getUser();
-        Integer userId = user.getId();
-
+    public R<MediaVo> merge(int total, String fileMd5, String fileName) {
         if (!checkChunkNum(total, fileMd5)) {
             log.error("分块数量缺失");
             return R.failure("分块数量缺失");
@@ -456,9 +457,9 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
 
         StatObjectResponse statFile = getStatFile(fileMd5, fileName);
 
-        applicationContext.getBean(MediaServiceImpl.class)
+        Media media = applicationContext.getBean(MediaServiceImpl.class)
                 .saveToDb(fileMd5, fileName, (int) statFile.size());
 
-        return R.success();
+        return R.success(MediaVo.findIt(media.getId(), media.getUrl()));
     }
 }

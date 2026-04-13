@@ -3,6 +3,7 @@ package com.hls.media.controller;
 
 import com.hls.base.R;
 import com.hls.media.service.IMediaService;
+import com.hls.media.vo.MediaVo;
 import io.minio.errors.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -37,7 +38,7 @@ public class MediaController {
      * @return 如果存在返回 ok 不存在 签证 其他用户正在上传 busy
      */
     @GetMapping("/check/file")
-    public R<String> checkFile(String fileMd5, String fileName) {
+    public R<MediaVo> checkFile(String fileMd5, String fileName) {
         return mediaService.checkFile(fileMd5, fileName);
     }
 
@@ -64,11 +65,9 @@ public class MediaController {
      * @return 是否合并成功
      */
     @GetMapping("/merge")
-    public R<Object> merge(int total, String fileMd5, String fileName) {
+    public R<MediaVo> merge(int total, String fileMd5, String fileName) {
         return mediaService.merge(total, fileMd5, fileName);
     }
-
-
 
 
 }

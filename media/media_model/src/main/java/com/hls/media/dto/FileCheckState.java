@@ -14,4 +14,5 @@ public class FileCheckState implements Serializable {
     private String state;
     private Integer mediaId;
     private String md5;
+    private String mediaUrl;
 }

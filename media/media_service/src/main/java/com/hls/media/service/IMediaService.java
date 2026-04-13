@@ -4,6 +4,7 @@ package com.hls.media.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hls.base.R;
 import com.hls.media.po.Media;
+import com.hls.media.vo.MediaVo;
 import io.minio.errors.*;
 
 import java.io.IOException;
@@ -28,7 +29,7 @@ public interface IMediaService extends IService<Media> {
      * @param fileName 文件名
      * @return 上传返回，ok，未上传，签证
      */
-    R<String> checkFile(String fileMd5, String fileName);
+    R<MediaVo> checkFile(String fileMd5, String fileName);
 
     /**
      * 检查分块文件是否存在
@@ -40,5 +41,5 @@ public interface IMediaService extends IService<Media> {
      */
     R<String> checkChunk(Integer id, String chunkMd5, String fileMd5);
 
-    R<Object> merge(int total, String fileMd5, String fileName);
+    R<MediaVo> merge(int total, String fileMd5, String fileName);
 }
