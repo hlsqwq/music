@@ -1,5 +1,6 @@
 package com.hls.content.controller;
 
+import com.hls.base.R;
 import com.hls.content.config.Access;
 import com.hls.content.dto.CategoryTreeDto;
 import com.hls.content.service.ICategoryService;
@@ -21,11 +22,13 @@ import java.util.List;
 @RequestMapping("/category")
 public class CategoryController {
 
+
     private final ICategoryService categoryService;
 
     @GetMapping("/list")
-    public List<CategoryTreeDto> getAllCategory() {
-        return categoryService.getAllCategory();
+    public R<List<CategoryTreeDto>> getAllCategory() {
+        List<CategoryTreeDto> allCategory = categoryService.getAllCategory();
+        return R.success(allCategory);
     }
 
     /**

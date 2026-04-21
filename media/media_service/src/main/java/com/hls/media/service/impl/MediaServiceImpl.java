@@ -265,7 +265,7 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
 
                 // 设置为 "ING" 状态，有效期建议与签证有效期一致
                 redisBase.set(key, new FileCheckState("ing", null, fileMd5, null),
-                        5L, TimeUnit.SECONDS);
+                        1L, TimeUnit.SECONDS);
 
                 // 投递延迟清理消息：如果 1 小时后还是 "ING"，说明上传失败，删掉 Redis 状态
                 mqBase.sendDelayHourMessageToMusic(MqConfig.MEDIA_TEMP_KEY,
@@ -303,7 +303,7 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
         Media media = new Media();
         media.setBucket(minioConfig.music);
         media.setPath(filePath);
-        media.setUrl(minioConfig.music + filePath);
+        media.setUrl("/" + minioConfig.music + "/" + filePath);
         media.setName(fileName);
         media.setType(getFileType(fileName));
         media.setSize(size);

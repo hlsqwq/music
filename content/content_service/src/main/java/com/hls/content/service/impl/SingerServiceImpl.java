@@ -16,6 +16,7 @@ import com.hls.base.po.Singer;
 import com.hls.content.po.TextInfo;
 import com.hls.content.service.ISingerService;
 import com.hls.content.service.ITextInfoService;
+import com.hls.content.vo.TextInfoVo;
 import lombok.RequiredArgsConstructor;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -50,21 +51,13 @@ public class SingerServiceImpl extends ServiceImpl<SingerMapper, Singer> impleme
     public void add_singer(SingerDto singerDto) {
         if (singerDto == null) {
             MusicException.cast("对象不可为空");
-            return;
         }
 
         Singer singer = BeanUtil.copyProperties(singerDto, Singer.class);
 
-        String introduction = singerDto.getIntroduction();
-        singerDto.setIntroduction(introduction.substring(0, 50));
-        String substring = introduction.substring(50);
-        if (!substring.isBlank()) {
-            TextInfo textInfo = new TextInfo();
-            textInfo.setContent(substring);
-            textInfoService.save(textInfo);
-            singer.setIntroduction(introduction.substring(0, 50));
-            singer.setIntroductionId(textInfo.getId());
-        }
+        TextInfoVo textInfoVo = textInfoService.saveContent(singerDto.getIntroduction(), 50);
+        singer.setIntroduction(textInfoVo.getText());
+        singer.setIntroductionId(textInfoVo.getId());
         save(singer);
     }
 
@@ -100,13 +93,11 @@ public class SingerServiceImpl extends ServiceImpl<SingerMapper, Singer> impleme
     @Override
     public void del_singer(Integer id) {
         Singer byId = getById(id);
-        LambdaQueryWrapper<TextInfo> qw = new LambdaQueryWrapper<TextInfo>()
-                .eq(TextInfo::getId, byId.getIntroductionId());
-        textInfoService.remove(qw);
+        textInfoService.removeById(byId.getIntroductionId());
         String substring = byId.getAvatarUrl().substring(byId.getAvatarUrl().indexOf("/") + 1);
         substring = substring.substring(substring.indexOf("/") + 1);
         mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY,
-                new com.hls.base.dto.DelTempMedia(byId.getAvatarId(),null, "music", substring));
+                new com.hls.base.dto.DelTempMedia(byId.getAvatarId(), null, "music", substring));
         removeById(id);
     }
 
@@ -165,6 +156,7 @@ public class SingerServiceImpl extends ServiceImpl<SingerMapper, Singer> impleme
 
     /**
      * 取消关注
+     *
      * @param singerId 歌手id
      * @return 更新后的粉丝数 long
      */

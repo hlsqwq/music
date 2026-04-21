@@ -6,6 +6,7 @@
         <groupId>com.hls</groupId>
         <artifactId>parent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../parent</relativePath>
     </parent>
     <artifactId>canal</artifactId>
 

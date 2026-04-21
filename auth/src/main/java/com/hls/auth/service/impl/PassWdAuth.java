@@ -31,9 +31,9 @@ public class PassWdAuth implements Auth {
             MusicException.cast("没有这用户");
         }
         //框架校验密码 省略
-        if (!smsClient.captchaValidate(authParams.getCheckCodeKey(), authParams.getCheckCode())) {
-            MusicException.cast("验证码错误");
-        }
+//        if (!smsClient.captchaValidate(authParams.getCheckCodeKey(), authParams.getCheckCode())) {
+//            MusicException.cast("验证码错误");
+//        }
         return one;
     }
 }

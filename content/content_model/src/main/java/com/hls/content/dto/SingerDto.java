@@ -30,21 +30,26 @@ public class SingerDto {
      */
     private String name;
 
+
+    /**
+     * 歌手分类
+     */
+    private Integer categoryId;
+
+
+    /**
+     * 歌手头像id
+     */
+    private String avatarId;
+
     /**
      * 歌手头像URL
      */
-    private String avatar;
+    private String avatarUrl;
 
 
     /**
      * 歌手简介
      */
     private String introduction;
-
-    /**
-     * 创建时间
-     */
-    private LocalDateTime createTime;
-
-
 }

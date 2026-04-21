@@ -2,6 +2,7 @@ package com.hls.content.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.hls.base.R;
 import com.hls.content.config.Redis;
 import com.hls.content.dto.CategoryTreeDto;
 import com.hls.content.mapper.CategoryMapper;
@@ -9,6 +10,7 @@ import com.hls.content.po.Category;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hls.content.service.ICategoryService;
 import lombok.RequiredArgsConstructor;
+import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -33,16 +34,18 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     private final CategoryMapper categoryMapper;
     private final RedisTemplate<String, Object> redisTemplate;
 
+
     @Redis(key = "Category_AllCategory")
     @Override
     public List<CategoryTreeDto> getAllCategory() {
         List<Category> rootCate = categoryMapper.getRootCate();
-        ArrayList<CategoryTreeDto> list = new ArrayList<>();
+        List<CategoryTreeDto> list = new ArrayList<>();
         for (Category c : rootCate) {
             LambdaQueryWrapper<Category> qw = new LambdaQueryWrapper<Category>()
                     .likeRight(Category::getPath, c.getPath());
             List<Category> children = list(qw);
             children.removeFirst();
+
             List<CategoryTreeDto> list1 = children.stream()
                     .map(v -> BeanUtil.copyProperties(v, CategoryTreeDto.class))
                     .toList();
