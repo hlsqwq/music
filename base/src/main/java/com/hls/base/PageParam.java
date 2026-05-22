@@ -19,4 +19,9 @@ public class PageParam {
      * 每页数量
      */
     private Integer size;
+
+    /**
+     * 搜索关键词（可选）
+     */
+    private String keyword;
 }

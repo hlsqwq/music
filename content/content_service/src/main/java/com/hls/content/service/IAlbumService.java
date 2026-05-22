@@ -3,8 +3,11 @@ package com.hls.content.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hls.base.PageParam;
 import com.hls.base.PageResult;
+import com.hls.base.R;
 import com.hls.content.dto.AlbumDetailDto;
 import com.hls.base.po.Album;
+
+import java.util.List;
 
 /**
  * <p>
@@ -54,5 +57,13 @@ public interface IAlbumService extends IService<Album> {
      * @return 专辑详细信息，包含歌曲列表
      */
     AlbumDetailDto getAlbumDetail(Integer albumId);
+
+    /**
+     * 获取专辑热度TopN
+     *
+     * @param topN 数量
+     * @return 专辑列表
+     */
+    R<List<Album>> getTopNAlbums(Integer topN);
 
 }

@@ -1,6 +1,8 @@
 package com.hls.content.controller;
 
 
+import com.hls.base.PageParam;
+import com.hls.base.PageResult;
 import com.hls.base.R;
 import com.hls.content.dto.EditSingerDto;
 import com.hls.content.dto.SingerDto;
@@ -29,6 +31,18 @@ public class SingerController {
 
 
     /**
+     * 分页查询歌手列表
+     *
+     * @param pageParam 分页参数
+     * @return 分页结果
+     */
+    @PostMapping("/list")
+    public PageResult<Singer> pageList(@RequestBody PageParam pageParam) {
+        return singerService.pageList(pageParam);
+    }
+
+
+    /**
      *
      * @param singerDto
      */
@@ -40,7 +54,7 @@ public class SingerController {
 
 
     @PutMapping("/update")
-    public void update_singer(EditSingerDto editSingerDto) {
+    public void update_singer(@RequestBody EditSingerDto editSingerDto) {
         singerService.update_singer(editSingerDto);
     }
 

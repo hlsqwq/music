@@ -2,6 +2,7 @@ package com.hls.content.controller;
 
 import com.hls.base.PageParam;
 import com.hls.base.PageResult;
+import com.hls.base.R;
 
 import com.hls.content.config.Access;
 import com.hls.content.dto.AlbumDetailDto;
@@ -9,6 +10,8 @@ import com.hls.base.po.Album;
 import com.hls.content.service.IAlbumService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * <p>
@@ -34,9 +37,20 @@ public class AlbumController {
      * @param pageParam 分页信息
      * @return 专辑
      */
-    @GetMapping("/page/{id}")
-    public PageResult<Album> pageBySingerId(@PathVariable Integer id, String order, @RequestBody PageParam pageParam) {
+    @PostMapping("/page/{id}")
+    public PageResult<Album> pageBySingerId(@PathVariable Integer id, @RequestParam(required = false) String order, @RequestBody PageParam pageParam) {
         return albumService.pageBySingerId(id, order, pageParam);
+    }
+
+    /**
+     * 获取专辑热度TopN
+     *
+     * @param topN 数量
+     * @return 专辑列表
+     */
+    @GetMapping("/top/{topN}")
+    public R<List<Album>> getTopNAlbums(@PathVariable Integer topN) {
+        return albumService.getTopNAlbums(topN);
     }
 
     /**

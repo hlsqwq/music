@@ -2,7 +2,10 @@ package com.hls.content.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hls.base.PageParam;
+import com.hls.base.PageResult;
 import com.hls.base.R;
 import com.hls.base.config.MqConfig;
 import com.hls.base.exception.MusicException;
@@ -25,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -45,6 +49,29 @@ public class SingerServiceImpl extends ServiceImpl<SingerMapper, Singer> impleme
     private final RedisKeys redisKeys;
     private final RedisBase redisBase;
     private final RedissonClient redissonClient;
+
+    /**
+     * 分页查询歌手列表
+     *
+     * @param pageParam 分页参数
+     * @return 分页结果
+     */
+    @Override
+    public PageResult<Singer> pageList(PageParam pageParam) {
+        Page<Singer> page = Page.of(pageParam.getNum(), pageParam.getSize());
+        LambdaQueryWrapper<Singer> qw = new LambdaQueryWrapper<Singer>();
+        if (pageParam.getKeyword() != null && !pageParam.getKeyword().isBlank()) {
+            qw.like(Singer::getName, pageParam.getKeyword());
+        }
+        qw.orderByDesc(Singer::getHot);
+        Page<Singer> res = page(page, qw);
+        PageResult<Singer> result = new PageResult<>();
+        result.setTotal(res.getTotal());
+        result.setItem(res.getRecords());
+        result.setNum(pageParam.getNum());
+        result.setSize(pageParam.getSize());
+        return result;
+    }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -93,11 +120,18 @@ public class SingerServiceImpl extends ServiceImpl<SingerMapper, Singer> impleme
     @Override
     public void del_singer(Integer id) {
         Singer byId = getById(id);
-        textInfoService.removeById(byId.getIntroductionId());
-        String substring = byId.getAvatarUrl().substring(byId.getAvatarUrl().indexOf("/") + 1);
-        substring = substring.substring(substring.indexOf("/") + 1);
-        mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY,
-                new com.hls.base.dto.DelTempMedia(byId.getAvatarId(), null, "music", substring));
+        if (byId == null) {
+            return;
+        }
+        if (byId.getIntroductionId() != null) {
+            textInfoService.removeById(byId.getIntroductionId());
+        }
+        if (byId.getAvatarUrl() != null) {
+            String substring = byId.getAvatarUrl().substring(byId.getAvatarUrl().indexOf("/") + 1);
+            substring = substring.substring(substring.indexOf("/") + 1);
+            mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY,
+                    new com.hls.base.dto.DelTempMedia(byId.getAvatarId(), null, "music", substring));
+        }
         removeById(id);
     }
 

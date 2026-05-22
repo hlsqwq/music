@@ -108,7 +108,7 @@ public class SearchServiceImpl implements SearchService {
         List<String> types = typeLimits.keySet().stream().toList();
         List<NativeQuery> list = types.stream()
                 .map(v -> getNativeQuery(keyword, v, null,
-                        new PageParam(0, typeLimits.get(v))))
+                        new PageParam(0, typeLimits.get(v), null)))
                 .toList();
 
         // 执行 multiSearch

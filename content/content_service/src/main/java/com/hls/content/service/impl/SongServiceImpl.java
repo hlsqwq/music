@@ -14,9 +14,11 @@ import com.hls.content.po.TextInfo;
 import com.hls.content.service.ITextInfoService;
 import com.hls.content.utils.RedisHotUtil;
 import com.hls.content.mapper.SongMapper;
+import com.hls.base.po.Singer;
 import com.hls.base.po.Song;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hls.content.service.ISongService;
+import com.hls.content.service.ISingerService;
 import com.hls.base.utils.AuditState;
 import com.hls.base.config.MqConfig;
 import com.hls.base.utils.MqBase;
@@ -44,6 +46,7 @@ public class SongServiceImpl extends ServiceImpl<SongMapper, Song> implements IS
     private final RedisKeys redisKeys;
     private final MqBase mqBase;
     private final ITextInfoService textInfoService;
+    private final ISingerService singerService;
     private final ApplicationContext applicationContext;
 
     @Override
@@ -114,19 +117,33 @@ public class SongServiceImpl extends ServiceImpl<SongMapper, Song> implements IS
     @Override
     @Transactional(rollbackFor = Exception.class)
     public R<String> addSong(SongDto songDto) {
-        if (songDto.getLyric().isBlank()) {
+        if (songDto.getLyric() == null || songDto.getLyric().isBlank()) {
             return R.failure("请添加歌词");
+        }
+        // 设置歌手名称
+        if (songDto.getSingerId() != null) {
+            Singer singer = singerService.getById(songDto.getSingerId());
+            if (singer != null) {
+                songDto.setSingerName(singer.getName());
+            }
+        }
+        // 设置默认审核状态
+        if (songDto.getStatus() == null) {
+            songDto.setStatus(AuditState.auditing);
         }
         TextInfo textInfo1 = new TextInfo();
         textInfo1.setContent(songDto.getLyric());
         textInfoService.save(textInfo1);
+        songDto.setLyricId(textInfo1.getId());
         String introduction = songDto.getIntroduction();
-        String substring = introduction.substring(50);
-        if (!substring.isBlank()) {
-            TextInfo textInfo = new TextInfo();
-            textInfo.setContent(substring);
-            textInfoService.save(textInfo);
-            songDto.setIntroduction(introduction.substring(0, 50));
+        if (introduction != null && introduction.length() > 50) {
+            String substring = introduction.substring(50);
+            if (!substring.isBlank()) {
+                TextInfo textInfo = new TextInfo();
+                textInfo.setContent(substring);
+                textInfoService.save(textInfo);
+                songDto.setIntroduction(introduction.substring(0, 50));
+            }
         }
         save(songDto);
         return R.success(null);
@@ -147,16 +164,24 @@ public class SongServiceImpl extends ServiceImpl<SongMapper, Song> implements IS
             return R.failure("没有这个对象");
         }
 
-        textInfoService.removeById(song.getIntroductionId());
-        textInfoService.removeById(song.getLyricId());
-        String substring = song.getAvatarUrl().substring(song.getAvatarUrl().indexOf("/") + 1);
-        substring = substring.substring(substring.indexOf("/") + 1);
-        mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY,
-                new DelTempMedia(song.getAvatarId(), null, "music", substring));
-        substring = song.getMusicUrl().substring(song.getMusicUrl().indexOf("/") + 1);
-        substring = substring.substring(substring.indexOf("/") + 1);
-        mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY,
-                new DelTempMedia(song.getMusicId(), null, "music", substring));
+        if (song.getIntroductionId() != null) {
+            textInfoService.removeById(song.getIntroductionId());
+        }
+        if (song.getLyricId() != null) {
+            textInfoService.removeById(song.getLyricId());
+        }
+        if (song.getAvatarUrl() != null) {
+            String substring = song.getAvatarUrl().substring(song.getAvatarUrl().indexOf("/") + 1);
+            substring = substring.substring(substring.indexOf("/") + 1);
+            mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY,
+                    new DelTempMedia(song.getAvatarId(), null, "music", substring));
+        }
+        if (song.getMusicUrl() != null) {
+            String substring = song.getMusicUrl().substring(song.getMusicUrl().indexOf("/") + 1);
+            substring = substring.substring(substring.indexOf("/") + 1);
+            mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY,
+                    new DelTempMedia(song.getMusicId(), null, "music", substring));
+        }
 
         removeById(songId);
         return R.success(null);
@@ -171,7 +196,7 @@ public class SongServiceImpl extends ServiceImpl<SongMapper, Song> implements IS
     @Override
     public R<List<Song>> getTopNSongs(Integer topN) {
         String songTop = redisKeys.getSongTop();
-        List<Integer> ids = redisBase.getTopN(songTop, 10).stream()
+        List<Integer> ids = redisBase.getTopN(songTop, topN).stream()
                 .map(String::valueOf)
                 .map(Integer::parseInt)
                 .toList();

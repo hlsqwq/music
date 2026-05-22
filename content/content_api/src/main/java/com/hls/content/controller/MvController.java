@@ -2,6 +2,7 @@ package com.hls.content.controller;
 
 import com.hls.base.PageParam;
 import com.hls.base.PageResult;
+import com.hls.base.R;
 import com.hls.base.po.Mv;
 import com.hls.content.service.IMvService;
 import lombok.RequiredArgsConstructor;
@@ -30,11 +31,22 @@ public class MvController {
      * @param pageParam 分页参数
      * @return
      */
-    @GetMapping("page/{id}")
+    @PostMapping("page/{id}")
     public PageResult<Mv> pageBySinger(@PathVariable Integer id, @RequestBody PageParam pageParam) {
         return mvService.pageBySinger(id, pageParam);
     }
 
+
+    /**
+     * 获取MV播放量TopN
+     *
+     * @param topN 数量
+     * @return MV列表
+     */
+    @GetMapping("/top/{topN}")
+    public R<List<Mv>> getTopNMvs(@PathVariable Integer topN) {
+        return mvService.getTopNMvs(topN);
+    }
 
 
     @PostMapping("/add")

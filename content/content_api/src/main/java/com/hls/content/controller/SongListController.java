@@ -1,6 +1,7 @@
 package com.hls.content.controller;
 
 import com.hls.base.PageParam;
+import com.hls.base.PageResult;
 import com.hls.base.R;
 import com.hls.content.dto.SongListDto;
 import com.hls.base.po.SongList;
@@ -32,8 +33,8 @@ public class SongListController {
      * @return 是否成功
      */
     @PostMapping("/add")
-    public R<Object> addSongList(@RequestBody SongList songList) {
-        return songListService.addSongList(songList);
+    public R<Object> addSongList(@RequestBody SongListDto songListDto) {
+        return songListService.addSongList(songListDto);
     }
 
     /**
@@ -54,8 +55,8 @@ public class SongListController {
      * @return 是否成功
      */
     @PutMapping("/update")
-    public R<Object> updateSongList(@RequestBody SongList songList) {
-        return songListService.updateSongList(songList);
+    public R<Object> updateSongList(@RequestBody SongListDto songListDto) {
+        return songListService.updateSongList(songListDto);
 
     }
 
@@ -73,11 +74,23 @@ public class SongListController {
     /**
      * 分页查询歌单
      *
+     * @param pageParam 分页参数
      * @return 歌单列表
      */
-    @GetMapping("/list")
-    public R<List<SongList>> getSongList(@RequestBody PageParam pageParam) {
-        return R.success(songListService.list());
+    @PostMapping("/list")
+    public R<PageResult<SongList>> pageList(@RequestBody PageParam pageParam) {
+        return songListService.pageList(pageParam);
+    }
+
+    /**
+     * 获取歌单热度TopN
+     *
+     * @param topN 数量
+     * @return 歌单列表
+     */
+    @GetMapping("/top/{topN}")
+    public R<List<SongList>> getTopNSongLists(@PathVariable Integer topN) {
+        return songListService.getTopNSongLists(topN);
     }
 
 }

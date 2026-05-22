@@ -3,7 +3,6 @@ package com.hls.base.po;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
-import java.time.LocalTime;
 import java.time.LocalDateTime;
 import java.io.Serializable;
 import lombok.Data;
@@ -88,9 +87,9 @@ public class Song implements Serializable {
     private Integer albumOrder;
 
     /**
-     * 持续时间
+     * 持续时间（秒）
      */
-    private LocalTime duration;
+    private Integer duration;
 
     /**
      * 收藏数

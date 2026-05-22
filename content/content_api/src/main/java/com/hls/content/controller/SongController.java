@@ -30,7 +30,7 @@ public class SongController {
 
 
 
-    @GetMapping
+    @PostMapping
     public R<PageResult<Song>> getSongs(@RequestBody PageParam pageParam) {
         return songService.getSongs(pageParam);
     }
@@ -42,7 +42,7 @@ public class SongController {
      * @param id 歌手id
      * @return
      */
-    @GetMapping("/page/{id}")
+    @PostMapping("/page/{id}")
     public PageResult<Song> pageBySingerId(@PathVariable Long id, @RequestBody PageParam pageParam) {
         return songService.pageBySingerId(id, pageParam);
     }

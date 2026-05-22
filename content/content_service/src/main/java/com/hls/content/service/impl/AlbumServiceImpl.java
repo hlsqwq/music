@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hls.base.PageParam;
 import com.hls.base.PageResult;
+import com.hls.base.R;
 import com.hls.base.config.MqConfig;
 import com.hls.base.dto.DelTempMedia;
 import com.hls.base.po.Album;
@@ -13,6 +14,8 @@ import com.hls.base.po.Singer;
 import com.hls.base.po.Song;
 import com.hls.base.utils.AuditState;
 import com.hls.base.utils.MqBase;
+import com.hls.base.utils.RedisBase;
+import com.hls.base.utils.RedisKeys;
 import com.hls.content.dto.AlbumDetailDto;
 import com.hls.content.mapper.AlbumMapper;
 import com.hls.content.po.*;
@@ -41,6 +44,8 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
     private final ISingerService singerService;
     private final ITextInfoService textInfoService;
     private final MqBase mqBase;
+    private final RedisKeys redisKeys;
+    private final RedisBase redisBase;
     private final ApplicationContext applicationContext;
 
     /**
@@ -75,44 +80,50 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
     @Transactional(rollbackFor = Exception.class)
     protected void add(AlbumDetailDto albumDetailDto) {
         Album album = BeanUtil.copyProperties(albumDetailDto, Album.class);
-        if (album.getIntroduction().length() > 50) {
+        if (album.getIntroduction() != null && album.getIntroduction().length() > 50) {
             String str = album.getIntroduction();
             album.setIntroduction(str.substring(0, 50));
-            str=str.substring(50);
-            if(!str.isBlank()){
+            str = str.substring(50);
+            if (!str.isBlank()) {
                 TextInfo textInfo = new TextInfo();
                 textInfo.setContent(str);
                 textInfoService.save(textInfo);
             }
-            save(album);
-        } else {
-            save(album);
         }
+        save(album);
         Singer byId = singerService.getById(album.getSingerId());
-        byId.setAlbumNum(byId.getAlbumNum() + 1);
-        singerService.updateById(byId);
+        if (byId != null) {
+            byId.setAlbumNum(byId.getAlbumNum() + 1);
+            singerService.updateById(byId);
+        }
 
         List<Song> songs = albumDetailDto.getSongs();
-        for (int i = 0; i < songs.size(); i++) {
-            if (Objects.isNull(songs.get(i).getAlbumId()) ||
-                    songs.get(i).getStatus().equals(AuditState.pass)) {
-                songs.get(i).setAlbumId(album.getId());
-                songs.get(i).setAlbumName(album.getName());
-                songs.get(i).setAlbumOrder(i);
+        if (songs != null && !songs.isEmpty()) {
+            for (int i = 0; i < songs.size(); i++) {
+                if (Objects.isNull(songs.get(i).getAlbumId()) ||
+                        AuditState.pass.equals(songs.get(i).getStatus())) {
+                    songs.get(i).setAlbumId(album.getId());
+                    songs.get(i).setAlbumName(album.getName());
+                    songs.get(i).setAlbumOrder(i);
+                }
             }
+            songService.updateBatchById(songs);
         }
-        songService.updateBatchById(songs);
     }
 
     @Override
     public void deleteAlbum(Integer albumId) {
         Album byId = getById(albumId);
+        if (byId == null) {
+            return;
+        }
         applicationContext.getBean(AlbumServiceImpl.class).del(byId);
-        //        http://192.168.124.8:9000/music/a3.png
-        String substring = byId.getAvatarUrl().substring(byId.getAvatarUrl().indexOf("/") + 1);
-        substring = substring.substring(substring.indexOf("/") + 1);
-        mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY,
-                new DelTempMedia(byId.getAvatarId(),null,"music",substring));
+        if (byId.getAvatarUrl() != null) {
+            String substring = byId.getAvatarUrl().substring(byId.getAvatarUrl().indexOf("/") + 1);
+            substring = substring.substring(substring.indexOf("/") + 1);
+            mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY,
+                    new DelTempMedia(byId.getAvatarId(), null, "music", substring));
+        }
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -131,9 +142,11 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
                 song.setAlbumName(null);
             }
             songService.updateBatchById(list);
-            Singer byId1 = singerService.getById(byId.getSingerId());
-            byId1.setAlbumNum(byId1.getAlbumNum() - 1);
-            singerService.updateById(byId1);
+            Singer singer = singerService.getById(byId.getSingerId());
+            if (singer != null && singer.getAlbumNum() > 0) {
+                singer.setAlbumNum(singer.getAlbumNum() - 1);
+                singerService.updateById(singer);
+            }
         }
         if(byId.getIntroductionId()!=null){
             textInfoService.removeById(byId.getIntroductionId());
@@ -165,6 +178,25 @@ public class AlbumServiceImpl extends ServiceImpl<AlbumMapper, Album> implements
         AlbumDetailDto albumDetailDto = BeanUtil.copyProperties(album, AlbumDetailDto.class);
         albumDetailDto.setSongs(list);
         return albumDetailDto;
+    }
+
+    /**
+     * 获取专辑热度TopN
+     *
+     * @param topN 数量
+     * @return 专辑列表
+     */
+    @Override
+    public R<List<Album>> getTopNAlbums(Integer topN) {
+        String albumTop = redisKeys.getAlbumTop();
+        List<Integer> ids = redisBase.getTopN(albumTop, topN).stream()
+                .map(String::valueOf)
+                .map(Integer::parseInt)
+                .toList();
+        if (ids.isEmpty()) {
+            return R.failure("等待下次更新");
+        }
+        return R.success(listByIds(ids));
     }
 
 }

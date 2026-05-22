@@ -61,14 +61,19 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     @Redis(key = "Category_AllCategory", type = "post")
     @Override
     public void addCategory(Long userId, Long id, String content) {
-        Category byId = getById(id);
-        if (Objects.isNull(byId)) {
-            return;
-        }
         Category category = new Category();
         category.setContent(content);
         save(category);
-        category.setPath(byId.getPath() + category.getId() + "/");
+        if (id == null) {
+            // 添加顶级分类
+            category.setPath(category.getId() + "/");
+        } else {
+            Category byId = getById(id);
+            if (Objects.isNull(byId)) {
+                return;
+            }
+            category.setPath(byId.getPath() + category.getId() + "/");
+        }
         updateById(category);
     }
 

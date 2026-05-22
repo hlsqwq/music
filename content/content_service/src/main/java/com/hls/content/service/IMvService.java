@@ -2,6 +2,7 @@ package com.hls.content.service;
 
 import com.hls.base.PageParam;
 import com.hls.base.PageResult;
+import com.hls.base.R;
 import com.hls.base.po.Mv;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -64,4 +65,12 @@ public interface IMvService extends IService<Mv> {
     Long incrOrDecrLikeNum(Integer mvId);
 
     void updatePlayOrLike(List<Mv> map);
+
+    /**
+     * 获取MV播放量TopN
+     *
+     * @param topN 数量
+     * @return MV列表
+     */
+    R<List<Mv>> getTopNMvs(Integer topN);
 }

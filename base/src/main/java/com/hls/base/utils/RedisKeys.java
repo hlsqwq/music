@@ -88,6 +88,30 @@ public class RedisKeys {
     }
 
     /**
+     * 获取MV排行榜key
+     * @return
+     */
+    public String getMvTop(){
+        return redisBase.getKey(DoType.singerTop.getDoName(), TableType.mv.getTableName());
+    }
+
+    /**
+     * 获取专辑排行榜key
+     * @return
+     */
+    public String getAlbumTop(){
+        return redisBase.getKey(DoType.singerTop.getDoName(), TableType.album.getTableName());
+    }
+
+    /**
+     * 获取歌单排行榜key
+     * @return
+     */
+    public String getSongListTop(){
+        return redisBase.getKey(DoType.singerTop.getDoName(), TableType.songList.getTableName());
+    }
+
+    /**
      * 检查文件或分块是否存在
      *
      * @param md5 文件MD5

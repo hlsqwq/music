@@ -4,10 +4,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hls.base.PageParam;
 import com.hls.base.PageResult;
+import com.hls.base.R;
 import com.hls.base.config.UserContext;
 import com.hls.base.dto.DelTempMedia;
 import com.hls.base.po.UserInfo;
 import com.hls.base.utils.RedisBase;
+import com.hls.base.utils.RedisKeys;
 import com.hls.content.utils.RedisHotUtil;
 import com.hls.base.po.Mv;
 import com.hls.base.po.Singer;
@@ -43,6 +45,7 @@ public class MvServiceImpl extends ServiceImpl<MvMapper, Mv> implements IMvServi
     private final ISingerService singerService;
     private final RedisHotUtil redisHotUtil;
     private final RedisBase redisBase;
+    private final RedisKeys redisKeys;
     private final DefaultRedisScript<Long> incrOrDecrLike;
     private final MqBase mqBase;
     private final ApplicationContext applicationContext;
@@ -67,6 +70,20 @@ public class MvServiceImpl extends ServiceImpl<MvMapper, Mv> implements IMvServi
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void addMv(Mv mv) {
+        if (mv.getVideoId() == null) {
+            mv.setVideoId(0);
+        }
+        // 设置默认审核状态
+        if (mv.getStatus() == null) {
+            mv.setStatus(AuditState.auditing);
+        }
+        // 设置歌手名称
+        if (mv.getSingerId() != null && mv.getSingerName() == null) {
+            Singer singer = singerMapper.selectById(mv.getSingerId());
+            if (singer != null) {
+                mv.setSingerName(singer.getName());
+            }
+        }
         save(mv);
         Singer singer = singerMapper.selectById(mv.getSingerId());
         if (singer != null) {
@@ -82,14 +99,18 @@ public class MvServiceImpl extends ServiceImpl<MvMapper, Mv> implements IMvServi
         if (mv == null) {
             return;
         }
-        String substring = mv.getAvatarUrl().substring(mv.getAvatarUrl().indexOf("/") + 1);
-        substring = substring.substring(substring.indexOf("/") + 1);
-        mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY,
-                new DelTempMedia(mv.getAvatarId(),null, "music", substring));
-        substring = mv.getVideo().substring(mv.getVideo().indexOf("/") + 1);
-        substring = substring.substring(substring.indexOf("/") + 1);
-        mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY,
-                new DelTempMedia(mv.getVideoId(),null, "music", substring));
+        if (mv.getAvatarUrl() != null) {
+            String substring = mv.getAvatarUrl().substring(mv.getAvatarUrl().indexOf("/") + 1);
+            substring = substring.substring(substring.indexOf("/") + 1);
+            mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY,
+                    new DelTempMedia(mv.getAvatarId(), null, "music", substring));
+        }
+        if (mv.getVideo() != null) {
+            String substring = mv.getVideo().substring(mv.getVideo().indexOf("/") + 1);
+            substring = substring.substring(substring.indexOf("/") + 1);
+            mqBase.sendMessageToMusic(MqConfig.MEDIA_TEMP_KEY,
+                    new DelTempMedia(mv.getVideoId(), null, "music", substring));
+        }
         removeById(mvId);
         Singer singer = singerMapper.selectById(mv.getSingerId());
         if (singer != null && singer.getMvNum() > 0) {
@@ -161,5 +182,24 @@ public class MvServiceImpl extends ServiceImpl<MvMapper, Mv> implements IMvServi
                     mv.getFavoriteNum(), mv.getCommentNum()));
         }
         updateBatchById(map);
+    }
+
+    /**
+     * 获取MV播放量TopN
+     *
+     * @param topN 数量
+     * @return MV列表
+     */
+    @Override
+    public R<List<Mv>> getTopNMvs(Integer topN) {
+        String mvTop = redisKeys.getMvTop();
+        List<Integer> ids = redisBase.getTopN(mvTop, topN).stream()
+                .map(String::valueOf)
+                .map(Integer::parseInt)
+                .toList();
+        if (ids.isEmpty()) {
+            return R.failure("等待下次更新");
+        }
+        return R.success(listByIds(ids));
     }
 }

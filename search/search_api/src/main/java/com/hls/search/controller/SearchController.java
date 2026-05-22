@@ -3,10 +3,12 @@ package com.hls.search.controller;
 import com.hls.base.PageParam;
 import com.hls.base.PageResult;
 import com.hls.base.R;
-import com.hls.search.doc.MusicDoc;
 import com.hls.search.service.SearchService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
@@ -19,7 +21,6 @@ import java.util.Map;
  */
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/search")
 public class SearchController {
 
     private final SearchService searchService;

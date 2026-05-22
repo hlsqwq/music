@@ -22,6 +22,9 @@ spring:
           - data-id: mq.yaml
             group: music
             refresh: true
+          - data-id: es.yaml
+            group: music
+            refresh: true
 
 
 

@@ -15,4 +15,6 @@ public class SongListDto extends SongList {
 
     private List<Song> songList;
 
+    private List<Integer> songIds;
+
 }

@@ -1,6 +1,8 @@
 package com.hls.content.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hls.base.PageParam;
+import com.hls.base.PageResult;
 import com.hls.base.R;
 import com.hls.content.dto.EditSingerDto;
 import com.hls.content.dto.SingerDto;
@@ -15,6 +17,14 @@ import com.hls.base.po.Singer;
  * @since 2026-01-17
  */
 public interface ISingerService extends IService<Singer> {
+
+    /**
+     * 分页查询歌手列表
+     *
+     * @param pageParam 分页参数
+     * @return 分页结果
+     */
+    PageResult<Singer> pageList(PageParam pageParam);
 
     void add_singer(SingerDto singerDto);
 
